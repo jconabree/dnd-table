@@ -9,7 +9,7 @@ function Index() {
 
 	return (
 		<>
-			<Head title="TOP PAGE" />
+			<Head title="Table Configurator" />
 			<div className="h-screen">
 				<Table />
 			</div>

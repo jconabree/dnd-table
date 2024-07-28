@@ -6,9 +6,16 @@
     "name": "jconabree"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "serve": "vite preview"
+    "dev": "concurrently \"npm run front:dev\" \"npm run server:dev\"",
+    "build": "concurrently \"npm run front:build\" \"npm run server:build\"",
+    "start": "concurrently \"npm run front:start\" \"npm run server:start\"",
+    "server:dev": "cd src/api && npm run dev",
+    "server:build": "cd src/api && npm run build",
+    "server:start": "cd src/api && npm run start",
+    "front:dev": "vite",
+    "front:build": "tsc && vite build",
+    "front:start": "vite preview",
+    "postinstall": "cd src/api && npm install"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",
@@ -26,6 +33,7 @@
     "@typescript-eslint/parser": "^6.20.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
+    "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard": "^17.1.0",

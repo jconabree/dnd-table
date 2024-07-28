@@ -12,7 +12,9 @@ export default defineConfig({
     host: true,
     cors: true,
     proxy: {
-      '/api/*': 'https://localhost:3434'
+      '/api': {
+        target: 'http://localhost:3434'
+      }
     }
   }
 })

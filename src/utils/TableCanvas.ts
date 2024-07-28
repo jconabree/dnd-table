@@ -60,6 +60,18 @@ export default class TableCanvas {
         this.onSelectCallback = callback;
     }
 
+    setSelection(ids: LEDID[]): void {
+        if (!ids.length) {
+            this.selectedRangeStart = null;
+            this.selectedRangeEnd = null;
+        } else {
+            this.selectedRangeStart = ids[0];
+            this.selectedRangeEnd = ids[ids.length - 1];
+        }
+
+        this.draw();
+    }
+
     resize(): void {
         this.#canvas.height = this.#canvas.offsetHeight;
         this.#canvas.width = this.#canvas.offsetWidth;
@@ -115,6 +127,7 @@ export default class TableCanvas {
 
     calculateLEDChunkPositions(): void {
         const tableCoords = this.getTableCoords();
+        this.ledChunks = [];
 
         const paths = [
             {
@@ -189,21 +202,21 @@ export default class TableCanvas {
     }
 
     draw(): void {
+        this.clear();
         this.drawTable();
         this.drawLEDChunks();
     }
 
     clear(): void {
         const ctx = this.#canvas.getContext('2d')!;
-        ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
+        ctx.clearRect(0, 0, this.#canvas.offsetWidth, this.#canvas.offsetHeight);
     }
 
     drawTable(): void {
         const ctx = this.#canvas.getContext('2d')!;
-        this.clear();
         const tableCoords = this.getTableCoords();
         ctx.beginPath();
-        ctx.strokeStyle = 'green';
+        ctx.strokeStyle = '#baa58a';
         ctx.lineWidth = this.tableLineWidth;
         ctx.strokeRect(
             tableCoords.topLeft.x + (this.tableLineWidth/2),
@@ -303,8 +316,8 @@ export default class TableCanvas {
             if (isRangeMinMax) {
                 rangeTriggered++;
             }
-            ctx.strokeStyle = rangeTriggered ? 'red' : this.getChunkColor(chunk);
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = rangeTriggered ? '#000' : this.getChunkColor(chunk);
+            ctx.lineWidth = rangeTriggered ? 3 : 1;
             ctx.strokeRect(
                 chunk.x,
                 chunk.y,
