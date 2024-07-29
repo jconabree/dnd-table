@@ -1,15 +1,16 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useConfiguratorContext } from "~/context/ConfiguratorProvider";
 import areaManager from '~/models/areas';
 import { AreaData } from "~/types/interface";
 
 type AddNewSelectionProps = {
     onClose: () => void;
+    onSuccess?: ({}) => void;
     area?: AreaData
 }
 
-export default ({ onClose, area }: AddNewSelectionProps) => {
-    const { selection, setSelection } = useConfiguratorContext();
+export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
+    const { selection, setSelection, setIsSelectMode } = useConfiguratorContext();
     const [nameError, setNameError] = useState<boolean>();
     const [typeError, setTypeError] = useState<boolean>();
     const nameRef = useRef<HTMLInputElement>(null);
@@ -61,10 +62,21 @@ export default ({ onClose, area }: AddNewSelectionProps) => {
             nodes: selection
         };
         console.log('save selection', areaToSave);
-        await areaManager.save(areaToSave);
+        const updatedArea = await areaManager.save(areaToSave);
+        if (typeof onSuccess === 'function') {
+            onSuccess(updatedArea);
+        }
         resetForm();
         onClose();
     }, [selection, resetForm, onClose]);
+
+    useEffect(() => {
+        setIsSelectMode(true);
+
+        return () => {
+            setIsSelectMode(false);
+        }
+    }, []);
     
     return (
         <div className="h-full flex flex-col justify-between">

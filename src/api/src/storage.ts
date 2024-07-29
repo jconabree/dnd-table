@@ -65,7 +65,7 @@ class Entity<DataStructure extends LooseData|LooseDataWithItems> implements Enti
         this.data.items = [
             item,
             ...(this.data.items || []).filter((existingItem: ItemData) => {
-                return item.id === existingItem.id;
+                return item.id !== existingItem.id;
             }),
         ]
 

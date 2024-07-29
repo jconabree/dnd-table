@@ -160,7 +160,7 @@ export default class TableCanvas {
             }
         ]
 
-        let id = 0;
+        let id = 1;
         paths.forEach((path) => {
             const isLtr = path.start < path.end;
             let currentCoord = isLtr ? path.start + this.tableLineWidth : path.start - this.tableLineWidth;
