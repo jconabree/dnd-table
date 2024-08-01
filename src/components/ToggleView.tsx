@@ -13,7 +13,7 @@ export default ({ onChange }: ToggleViewProps) => {
         <label className="btn btn-circle swap swap-rotate">
             <input type="checkbox" defaultChecked={true} onChange={handleChange}/>
             <svg
-                className="swap-on w-8 h-8"
+                className="swap-on w-5 h-5"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -25,7 +25,7 @@ export default ({ onChange }: ToggleViewProps) => {
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>
             </svg>
             <svg
-                className="swap-off w-8 h-8"
+                className="swap-off w-5 h-5"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"

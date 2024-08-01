@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import areaModel from "../models/areas";
 import { AreaData } from '../types/interface';
 import ToggleView from './ToggleView';
@@ -15,6 +15,7 @@ type ListAreasProps = {
 export default ({ onClose }: ListAreasProps) => {
     const initialRender = useRef(true);
     const [areas, setAreas] = useState<AreaListingItem[]>();
+    const [filteredType, setFilteredType] = useState<string>();
     const [selectedArea, setSelectedArea] = useState<AreaData>();
     const [showEditForm, setShowEditForm] = useState<boolean>(false);
 
@@ -25,7 +26,25 @@ export default ({ onClose }: ListAreasProps) => {
     const handleEditClose = useCallback(() => {
         setSelectedArea(undefined);
         setShowEditForm(false);
-    }, [])
+    }, []);
+
+    const filters = useMemo(() => {
+        return areas?.reduce((allFilters: string[], area) => {
+            if (!allFilters.includes(area.type)) {
+                allFilters.push(area.type);
+            }
+
+            return allFilters;
+        }, ['All']);
+    }, [areas]);
+
+    const filteredAreas = useMemo(() => {
+        if (!filteredType || filteredType === 'All') {
+            return areas;
+        }
+
+        return areas?.filter(({ type }) => type === filteredType);
+    }, [areas, filteredType]);
 
     useEffect(() => {
         (async () => {
@@ -61,12 +80,20 @@ export default ({ onClose }: ListAreasProps) => {
 
     return (
         <div>
-            <div className="actions -mt-8 grid grid-cols-2 gap-x-2">
-                <div className="dropdown w-full">
+            <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2">
+                <div className="dropdown dropdown-left w-full">
                     <button type="button" className="btn btn-neutral w-full">Filter By Area</button>
                     <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                        <li><a>Item 1</a></li>
-                        <li><a>Item 2</a></li>
+                        {filters?.map((filter) => {
+                            return (
+                                <li
+                                    key={filter}
+                                    className={filter === filteredType ? 'bg-gray-200' : ''}
+                                >
+                                    <a onClick={() => setFilteredType(filter)}>{filter}</a>
+                                </li>
+                            )
+                        })}
                     </ul>
                 </div>
                 <button
@@ -76,7 +103,7 @@ export default ({ onClose }: ListAreasProps) => {
                 >New Area</button>
             </div>
             <div className="menu">
-                {areas?.map((area) => {
+                {filteredAreas?.map((area) => {
                     const handleVisibilityChange = (isVisible: boolean) => {
                         setAreas((currentAreas) => {
                             return [
