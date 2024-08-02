@@ -130,54 +130,48 @@ export default class TableCanvas {
         this.ledChunks = [];
 
         const paths = [
-            {
-                start: tableCoords.bottomLeft.x,
+            { // Bottom Line
+                start: tableCoords.bottomLeft.x + this.tableLineWidth,
                 end: tableCoords.bottomRight.x,
                 direction: 'x',
                 static: tableCoords.bottomLeft.y,
-                numberOfNodes: this.getNodeCountForLength(this.realTableWidth)
+                numberOfNodes: 18
             },
-            {
+            { // Right Line
                 start: tableCoords.bottomRight.y,
-                end: tableCoords.topRight.y,
+                end: tableCoords.topRight.y + this.tableLineWidth,
                 direction: 'y',
                 static: tableCoords.bottomRight.x,
-                numberOfNodes: this.getNodeCountForLength(this.realTableHeight)
+                numberOfNodes: 29
             },
-            {
+            { // Top Line
                 start: tableCoords.topRight.x,
-                end: tableCoords.topLeft.x,
+                end: tableCoords.topLeft.x + this.tableLineWidth,
                 direction: 'x',
                 static: tableCoords.topRight.y + this.tableLineWidth,
-                numberOfNodes: this.getNodeCountForLength(this.realTableWidth)
+                numberOfNodes: 18
             },
-            {
-                start: tableCoords.topLeft.y,
+            { // Left Line
+                start: tableCoords.topLeft.y + this.tableLineWidth,
                 end: tableCoords.bottomLeft.y,
                 direction: 'y',
                 static: tableCoords.topLeft.x + this.tableLineWidth,
-                numberOfNodes: this.getNodeCountForLength(this.realTableHeight)
+                numberOfNodes: 29
             }
         ]
 
         let id = 1;
         paths.forEach((path) => {
             const isLtr = path.start < path.end;
-            let currentCoord = isLtr ? path.start + this.tableLineWidth : path.start - this.tableLineWidth;
             let nodeCount = 0;
-            const totalLength = Math.abs(isLtr ? path.end - path.start : path.end - path.start);
-            const width = (totalLength - this.tableLineWidth) / path.numberOfNodes;
+            const totalLength = Math.abs(path.end - path.start);
+            const width = totalLength / path.numberOfNodes;
+            let currentCoord = isLtr ? path.start : path.start - width;
             while (nodeCount < path.numberOfNodes) {
                 const xPos = path.direction === 'x' ? currentCoord : path.static;
                 const yPos = path.direction === 'y' ? currentCoord : path.static;
                 const rectWidth = path.direction === 'x' ? width : this.tableLineWidth * (isLtr ? -1 : 1);
                 const rectHeight = path.direction === 'y' ? width : this.tableLineWidth * (isLtr ? 1 : -1);
-
-                if (isLtr) {
-                    currentCoord += width;
-                } else {
-                    currentCoord -= width;
-                }
 
                 this.ledChunks.push({
                     id,
@@ -185,7 +179,13 @@ export default class TableCanvas {
                     y: yPos,
                     width: rectWidth,
                     height: rectHeight
-                })
+                });
+
+                if (isLtr) {
+                    currentCoord += width;
+                } else {
+                    currentCoord -= width;
+                }
 
                 nodeCount++;
                 id++;
@@ -218,6 +218,7 @@ export default class TableCanvas {
         ctx.beginPath();
         ctx.strokeStyle = '#baa58a';
         ctx.lineWidth = this.tableLineWidth;
+        ctx.lineCap = 'butt';
         ctx.strokeRect(
             tableCoords.topLeft.x + (this.tableLineWidth/2),
             tableCoords.topLeft.y + (this.tableLineWidth/2),
@@ -233,7 +234,7 @@ export default class TableCanvas {
      * @param length 
      */
     getNodeCountForLength(length: number) {
-        return Math.floor((length * 0.0254 * 96) / 6);
+        return (length * 0.0254 * 96) / 6;
     }
 
     bindChunkHover(): void {

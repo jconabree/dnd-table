@@ -25,13 +25,13 @@ type FillValue = {
 }
 
 export type Effect = {
-    duration: number; // in seconds
+    type: 'solid'|'fill'|'gradient';
+    value: ColorValue|FillValue|GradientValue;
+    duration?: number; // in seconds
     parallel?: boolean; // execute in parallel with others. By default it will execute when the previous one finishes
     delay?: number; // Used with parallel
-    type: 'solid'|'fill'|'gradient';
-    repeat: boolean|number;
+    repeat?: boolean|number|'infinite';
     repeatDirection?: 'forward'|'reverse';
-    value: ColorValue|FillValue|GradientValue;
 }
 
 export type EffectData = {
