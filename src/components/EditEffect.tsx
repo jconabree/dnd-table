@@ -102,7 +102,14 @@ const EffectForm = ({ onChange, onRemove, effect }: EffectFormProps) => {
                             <span className="label-text">Repeat</span>
                         </div>
                         <select
-                            onChange={(event) => { onChange('repeat', event.target.value)}}
+                            onChange={(event) => {
+                                onChange(
+                                    'repeat',
+                                    event.target.value === '' ? false :
+                                    event.target.value === 'infinite' ? event.target.value :
+                                    Number.parseInt(event.target.value)
+                                )
+                            }}
                             className="select select-bordered w-full max-w-xs"
                             defaultValue={typeof effect.repeat === 'boolean' ? '' : effect.repeat}
                         >
