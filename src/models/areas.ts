@@ -2,16 +2,20 @@ import { AreaData, AreaList } from '~/types/interface';
 
 class AreaManager {
     #apiBase = '/api/areas';
+    #cache: Promise<AreaList['items']>|null = null;
 
     async list(): Promise<AreaList['items']> {
-        const response = await fetch(`${this.#apiBase}/list`);
-        console.log('fetch response', response);
-        const data = await response.json();
+        if (!this.#cache) {
+            const response = await fetch(`${this.#apiBase}/list`);
+            console.log('fetch response', response);
+            this.#cache = await response.json();
+        }
 
-        return data;
+        return this.#cache!;
     }
 
     async save(area: AreaData) {
+        this.#cache = null;
         const response = await fetch(
             `${this.#apiBase}/area`,
             {

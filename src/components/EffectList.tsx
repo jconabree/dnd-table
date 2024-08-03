@@ -12,16 +12,6 @@ type EffectListProps = {
     onClose: () => void;
 }
 export default ({ onClose }: EffectListProps) => {
-    // return (
-    //     <div>
-    //         <ul>
-    //             <li>Create effects and attach them to areas</li>
-    //             <li>Activate effects</li>
-    //             <li>Can quick disable or remove areas from effects</li>
-    //         </ul>
-    //     </div>
-    // )
-
     const initialRender = useRef(true);
     const [effects, setEffects] = useState<EffectListingItem[]>();
     const [selectedEffect, setSelectedEffect] = useState<EffectData>();
@@ -36,36 +26,43 @@ export default ({ onClose }: EffectListProps) => {
         setShowEditForm(false);
     }, []);
 
-    useEffect(() => {
-        (async () => {
-            const items: EffectListingItem[] = await effectsModel.list();
-            console.log('response', items);
-            setEffects(
-                items?.map((item) => {
-                    item.active = false;
+    const loadList = useCallback(async () => {
+        const items: EffectListingItem[] = await effectsModel.list();
+        console.log('response', items);
+        setEffects((currentItems) => {
+            return items?.map((item) => {
+                const currentItem = currentItems?.find(({ id }) => id === item.id);
+                item.active = currentItem?.active ?? false;
 
-                    return item;
-                })
-            );
-        })();
+                return item;
+            })
+        });
+    }, [])
+
+    useEffect(() => {
+        loadList();
     }, []);
     
     useEffect(() => {
+        if (!effects) {
+            return;
+        }
+
         if (initialRender.current) {
             initialRender.current = false;
 
             return;
         }
 
-        const activeEffects = effects!.filter((effect) => {
+        const activeEffect = effects!.find((effect) => {
             return effect.active;
         });
 
-        console.log('set canvas active effects', activeEffects);
+        console.log('set canvas active effects', activeEffect);
     }, [effects])
 
     if (showEditForm) {
-        return <EditEffect onClose={handleEditClose} effect={selectedEffect} />;
+        return <EditEffect onClose={handleEditClose} onSuccess={loadList} effect={selectedEffect} />;
     }
 
     return (
@@ -88,16 +85,16 @@ export default ({ onClose }: EffectListProps) => {
                         setEffects((currentEffects) => {
                             return [
                                 ...currentEffects!.map((currentEffect) => {
-                                    if (currentEffect.id === effect.id) {
-                                        currentEffect.active = isActive
-                                    }
+                                    currentEffect.active = currentEffect.id === effect.id && isActive;
 
                                     return {
-                                        ...currentEffects
+                                        ...currentEffect
                                     };
                                 })
                             ]
                         });
+
+                        effectsModel.changeActiveEffect(effect.id, isActive);
                     }
 
                     const handleEditClick = () => {
@@ -107,7 +104,38 @@ export default ({ onClose }: EffectListProps) => {
 
                     return (
                         <div key={effect.id} className="flex justify-between items-center py-2 border-t last:border-b border-gray-400">
-                            <ToggleView onChange={handleActiveChange} />
+                            <ToggleView
+                                onChange={handleActiveChange}
+                                state={effect.active}
+                                onIcon={(
+                                    <svg
+                                        className="swap-on w-5 h-5 stroke-primary"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>
+                                    </svg>
+                                )}
+                                offIcon={(
+                                    <svg
+                                        className="swap-off w-5 h-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>
+                                    </svg>
+                                )}
+                            />
                             <span className="flex self-center">
                                 {effect.name}
                             </span>

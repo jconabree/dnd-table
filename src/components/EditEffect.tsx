@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react';
-import { HexColorPicker } from "react-colorful";
+import { RgbaStringColorPicker } from "react-colorful";
+import {
+    Droppable,
+    Draggable,
+    DroppableProvided,
+    DroppableStateSnapshot,
+    DraggableProvided,
+    DraggableStateSnapshot
+} from 'react-beautiful-dnd';
+import clsx from 'clsx';
 // import { useConfiguratorContext } from "~/context/ConfiguratorProvider";
 import effectManager from '~/models/effects';
 import areaManager from '~/models/areas';
@@ -14,8 +23,24 @@ type EffectFormProps = {
 
 const EffectForm = ({ onChange, onRemove, effect }: EffectFormProps) => {
     return (
-        <div className="card bg-base-100 w-96 shadow-xl">
+        <div className="card bg-base-100 w-full shadow-xl">
             <div className="card-body">
+                <div className="card-actions justify-end">
+                    <button className="btn btn-square btn-sm btn-warning" onClick={onRemove}>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-4 h-4"
+                        >
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
                 <label className="form-control w-full max-w-xs">
                     <div className="label">
                         <span className="label-text">Type</span>
@@ -71,9 +96,11 @@ const EffectForm = ({ onChange, onRemove, effect }: EffectFormProps) => {
                         />
                     </label>
                 )}
-                <div className="form-control">
-                    <label className="label cursor-pointer">
-                        <span className="label-text">Repeat</span>
+                {effect.duration && effect.duration >= 1 && (
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">Repeat</span>
+                        </div>
                         <select
                             onChange={(event) => { onChange('repeat', event.target.value)}}
                             className="select select-bordered w-full max-w-xs"
@@ -88,31 +115,36 @@ const EffectForm = ({ onChange, onRemove, effect }: EffectFormProps) => {
                             })}
                         </select>
                     </label>
-                </div>
-                {effect.repeat && effect.repeat !== 'infinite' && (
-                    <div className="form-control">
-                        <label className="label cursor-pointer">
+                )}
+                {effect.duration && effect.duration >= 1 && effect.repeat && effect.repeat !== 'infinite' && (
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
                             <span className="label-text">Repeat Direction</span>
-                            <select
-                                onChange={(event) => { onChange('repeatDirection', event.target.value)}}
-                                className="select select-bordered w-full max-w-xs"
-                                defaultValue={effect.repeatDirection ?? 'forward'}
-                            >
-                                <option value="forward">Forward</option>
-                                <option value="reverse">Reverse</option>
-                            </select>
-                        </label>
-                    </div>
+                        </div>
+                        <select
+                            onChange={(event) => { onChange('repeatDirection', event.target.value)}}
+                            className="select select-bordered w-full max-w-xs"
+                            defaultValue={effect.repeatDirection ?? 'forward'}
+                        >
+                            <option value="forward">Forward</option>
+                            <option value="reverse">Reverse</option>
+                        </select>
+                    </label>
                 )}
                 {effect.type === 'solid' && (
-                    <HexColorPicker
-                        color={effect.value as string}
-                        onChange={(newColorValue) => { onChange('value', newColorValue) }}
-                    />
+                    <label className="form-control w-full max-w-xs mt-3">
+                        <div className="label pb-4">
+                            <span className="label-text">Solid Color Value</span>
+                        </div>
+                        <RgbaStringColorPicker
+                            color={effect.value as string}
+                            onChange={(newColorValue) => { onChange('value', newColorValue) }}
+                        />
+                        <div className="label">
+                            <span className="label-text-alt">{effect.value as string}</span>
+                        </div>
+                    </label>
                 )}
-                <div className="card-actions justify-end">
-                    <button className="btn btn-danger" onClick={onRemove}>Remove</button>
-                </div>
             </div>
         </div>
     )
@@ -127,19 +159,17 @@ type AreaEffectFormProps = {
 export default ({ onClose, onSuccess, effect }: AreaEffectFormProps) => {
     // const { selection, setSelection, setIsSelectMode } = useConfiguratorContext();
     const [nameError, setNameError] = useState<boolean>();
-    const [typeError, setTypeError] = useState<boolean>();
+    const [name, setName] = useState<string>(effect?.name || '');
     const [availableAreas, setAvailableAreas] = useState<AreaData[]>();
-    const [selectedAreas, setSelectedAreas] = useState<AreaData['id'][]>([]);
+    const [selectedAreas, setSelectedAreas] = useState<AreaData[]>([]);
     const [areaSearch, setAreaSearch] = useState<string>('');
     const [effects, setEffects] = useState<Effect[]>(() => {
         if (!effect) {
             return [];
         }
 
-        return effect.effects;
+        return effect.effects as Effect[];
     })
-    const nameRef = useRef<HTMLInputElement>(null);
-    const typeRef = useRef<HTMLSelectElement>(null);
 
     const filteredAreas = useMemo(() => {
         return availableAreas?.filter((area) => area.name.includes(areaSearch)) ?? [];
@@ -147,14 +177,10 @@ export default ({ onClose, onSuccess, effect }: AreaEffectFormProps) => {
 
     const resetForm = useCallback(() => {
         setNameError(false);
-        setTypeError(false);
-        nameRef.current!.value = '';
-        typeRef.current!.value = '';
-        const defaultOption: HTMLOptionElement = typeRef.current!.querySelector('option[value=""]')!;
-        defaultOption.selected = true;
     }, []);
 
-    const handleNameChange = useCallback(() => {
+    const handleNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        setName(event.target.value);
         setNameError(false);
     }, []);
 
@@ -163,7 +189,7 @@ export default ({ onClose, onSuccess, effect }: AreaEffectFormProps) => {
             return [
                 {
                     type: 'solid',
-                    value: '#FFFFFF'
+                    value: 'rgba(255,255,255,1)'
                 },
                 ...currentEffects
             ]
@@ -183,114 +209,171 @@ export default ({ onClose, onSuccess, effect }: AreaEffectFormProps) => {
     }, [onClose, resetForm]);
 
     const handleConfirmClick = useCallback(async () => {
-        const name = nameRef.current!.value;
-        const type = typeRef.current!.value;
-
         if (!name) {
             setNameError(true);
         }
 
-        if (!type) {
-            setTypeError(true);
-        }
-
-        if (!name || !type) {
+        console.log('confirm click', name, selectedAreas, effects);
+        if (!name || !selectedAreas.length || !effects.length) {
             return;
         }
 
         const effectToSave = {
             ...effect||{},
             name,
-            effects: [{
-                type: type as Effect['type'],
-                duration: 30, // in seconds
-                // parallel?: boolean; // execute in parallel with others. By default it will execute when the previous one finishes
-                // delay?: number; // Used with parallel
-                // type: 'solid'|'fill'|'gradient';
-                repeat: false,
-                value: '#FF0000'
-            }],
-            areas: ['123']
+            effects: effects,
+            areas: selectedAreas.map((area) => area.id!)
         };
-        console.log('save selection', effectToSave);
+
+        console.log('effect to save', effectToSave);
+
         const updatedArea = await effectManager.save(effectToSave);
         if (typeof onSuccess === 'function') {
             onSuccess(updatedArea);
         }
+
         resetForm();
         onClose();
-    }, [resetForm, onClose]);
+    }, [resetForm, onClose, effects, name, selectedAreas]);
 
     useEffect(() => {
         (async() => {
             const areas = await areaManager.list();
 
             setAvailableAreas(areas);
+
+            if (effect) {
+                setSelectedAreas(areas.filter((area) => effect.areas.includes(area.id!)));
+            }
         })();
     }, []);
     
+    if (typeof availableAreas === 'undefined') {
+        return null;
+    }
+
     return (
-        <div className="h-full flex flex-col justify-between">
-            <div className="flex flex-col gap-y-6">
-                <label className="form-control w-full max-w-xs">
-                    <div className="label">
-                        <span className="label-text">Effect Name</span>
+        <>
+            <div className="flex flex-col justify-between pb-12">
+                <div className="flex flex-col gap-y-6">
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">Effect Name</span>
+                        </div>
+                        <input
+                            onChange={handleNameChange}
+                            type="text"
+                            placeholder="Name"
+                            className={`input input-bordered w-full max-w-xs ${nameError ? 'input-error' : ''}`}
+                            defaultValue={effect?.name}
+                        />
+                    </label>
+
+                    <label className="form-control w-full max-w-xs">
+                        <Combobox immediate multiple value={selectedAreas} onChange={setSelectedAreas} onClose={() => setAreaSearch('')}>
+                            <div className="label">
+                                <span className="label-text">Areas</span>
+                            </div>
+                            <ComboboxInput
+                                className="input input-bordered w-full max-w-xs"
+                                onChange={(event) => setAreaSearch(event.target.value)}
+                            />
+                            <ComboboxOptions
+                                anchor="bottom"
+                                transition
+                                className={clsx(
+                                    'w-[var(--input-width)] rounded-xl border border-primary bg-neutral text-base-content p-1 [--anchor-gap:var(--spacing-1)] empty:invisible',
+                                    'transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0'
+                                )}
+                            >
+                                {filteredAreas.map((area) => (
+                                    <ComboboxOption
+                                        key={area.id}
+                                        value={area}
+                                        className="group flex cursor-default items-center gap-2 rounded-lg py-1.5 px-3 select-none data-[selected]:bg-accent data-[selected]:text-accent-content data-[focus]:bg-white/10"
+                                    >
+                                        {area.name}
+                                    </ComboboxOption>
+                                ))}
+                            </ComboboxOptions>
+                        </Combobox>
+                        {selectedAreas.length > 0 && (
+                            <div className="py-3">
+                                <span className="font-semibold">Selected Areas:</span>
+                                <ul className="pl-4">
+                                    {selectedAreas.map((area: AreaData) => (
+                                        <li key={area.id} className="py-2">{area.name}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </label>
+                    
+                    <div>
+                        <div className="flex justify-between items-center pb-4">
+                            <span className="text-lg font-bold">Effects</span>
+                            <button type="button" className="btn btn-sm btn-accent" onClick={handleAddEffect}>Add +</button>
+                        </div>
+                        {effects.length > 0 && (
+                            // <Droppable droppableId="droppable">
+                            //     {(provided:DroppableProvided, snapshot:DroppableStateSnapshot) => (
+                            //         <div
+                            //             ref={provided.innerRef}
+                            //             {...provided.droppableProps}
+                            //             className={`
+                            //                 min-h-80
+                            //                 ${snapshot.isDraggingOver ? 'bg-accent' : 'bg-neutral'}
+                            //             `}
+                            //         >
+                                    <div className="grid gap-y-4 pb-6">
+                                        {effects.map((addedEffect, index) => {
+                                            // const effectId = index.toString();
+                                            const handleEffectChange = (key: string, value: any) => {
+                                                console.log('effect change', key, value)
+                                                setEffects((currentEffects) => {
+                                                    currentEffects[index] = {
+                                                        ...addedEffect,
+                                                        [key]: value
+                                                    };
+
+                                                    return [
+                                                        ...currentEffects
+                                                    ]
+                                                })
+                                            };
+
+                                            const handleRemove = () => {
+                                                handleRemoveEffect(index);
+                                            }
+
+                                            return (
+                                                // <Draggable key={index} index={index} draggableId={effectId}>
+                                                //     {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
+                                                //         <div
+                                                //             ref={provided.innerRef}
+                                                //             {...provided.draggableProps}
+                                                //             {...provided.dragHandleProps}
+                                                //         >
+                                                            <EffectForm
+                                                                key={index}
+                                                                effect={addedEffect}
+                                                                onChange={handleEffectChange}
+                                                                onRemove={handleRemove}
+                                                            />
+                                                //         </div>
+                                                //     )}
+                                                // </Draggable>
+                                            )
+                                        })}
+                                    </div>
+                            //         </div>
+                            //     )}
+                            // </Droppable>
+                        )}
                     </div>
-                    <input
-                        ref={nameRef}
-                        onChange={handleNameChange}
-                        type="text"
-                        placeholder="Name"
-                        className={`input input-bordered w-full max-w-xs ${nameError ? 'input-error' : ''}`}
-                        defaultValue={effect?.name}
-                    />
-                </label>
-
-                <Combobox multiple value={selectedAreas} onChange={setSelectedAreas} onClose={() => setAreaSearch('')}>
-                    {selectedAreas.length > 0 && (
-                        <ul>
-                        {selectedAreas.map((areaId: AreaData['id']) => (
-                            <li key={areaId}>{areaId}</li>
-                        ))}
-                        </ul>
-                    )}
-                    <ComboboxInput aria-label="Assignees" onChange={(event) => setAreaSearch(event.target.value)} />
-                    <ComboboxOptions anchor="bottom" className="border empty:invisible">
-                        {filteredAreas.map((area) => (
-                        <ComboboxOption key={area.id} value={area.id} className="data-[focus]:bg-blue-100">
-                            {area.name}
-                        </ComboboxOption>
-                        ))}
-                    </ComboboxOptions>
-                </Combobox>
-                
-                <div>
-                    Effects <button type="button" className="btn btn-primary" onClick={handleAddEffect}>+</button>
-                    {effects.map((addedEffect, index) => {
-                        const handleEffectChange = (key: string, value: any) => {
-                            setEffects((currentEffects) => {
-                                currentEffects[index] = {
-                                    ...addedEffect,
-                                    [key]: value
-                                };
-
-                                return [
-                                    ...currentEffects
-                                ]
-                            })
-                        };
-
-                        const handleRemove = () => {
-                            handleRemoveEffect(index);
-                        }
-
-                        return (
-                            <EffectForm effect={addedEffect} onChange={handleEffectChange} onRemove={handleRemove} />
-                        )
-                    })}
                 </div>
             </div>
-            <div className="join w-full">
+            <div className="absolute bottom-0 h-12 join w-full pr-12">
                 <button
                     type="button"
                     className="btn btn-neutral join-item w-1/2"
@@ -301,12 +384,11 @@ export default ({ onClose, onSuccess, effect }: AreaEffectFormProps) => {
                 <button
                     type="button"
                     className="btn join-item w-1/2 btn-success"
-                    disabled={!selection?.length}
                     onClick={handleConfirmClick}
                 >
                     Confirm
                 </button>
             </div>
-        </div>
+        </>
     )
 }

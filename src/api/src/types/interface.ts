@@ -46,3 +46,8 @@ export type EffectData = {
 export type EffectList = {
     items: EffectData[]
 }
+
+export type EffectArgumentData = {
+    nodes: AreaData['nodes'];
+    effects: Effect[]
+}

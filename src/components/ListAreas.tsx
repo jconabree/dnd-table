@@ -46,21 +46,28 @@ export default ({ onClose }: ListAreasProps) => {
         return areas?.filter(({ type }) => type === filteredType);
     }, [areas, filteredType]);
 
-    useEffect(() => {
-        (async () => {
-            const items: AreaListingItem[] = await areaModel.list();
-            console.log('response', items);
-            setAreas(
-                items?.map((item) => {
-                    item.visible = true;
+    const loadList = useCallback(async () => {
+        const items: AreaListingItem[] = await areaModel.list();
+        console.log('response', items);
+        setAreas((currentItems) =>{
+            return items?.map((item) => {
+                const currentItem = currentItems?.find(({ id }) => id === item.id);
+                item.visible = currentItem?.visible ?? true;
 
-                    return item;
-                })
-            );
-        })();
+                return item;
+            });
+        });
+    }, [])
+
+    useEffect(() => {
+        loadList();
     }, []);
     
     useEffect(() => {
+        if (!areas) {
+            return;
+        }
+
         if (initialRender.current) {
             initialRender.current = false;
 
@@ -75,14 +82,14 @@ export default ({ onClose }: ListAreasProps) => {
     }, [areas])
 
     if (showEditForm) {
-        return <EditArea onClose={handleEditClose} area={selectedArea} />;
+        return <EditArea onClose={handleEditClose} onSuccess={loadList} area={selectedArea} />;
     }
 
     return (
         <div>
             <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2">
                 <div className="dropdown dropdown-left w-full">
-                    <button type="button" className="btn btn-neutral w-full">Filter By Area</button>
+                    <button type="button" className="btn btn-neutral w-full">Filter By Type</button>
                     <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
                         {filters?.map((filter) => {
                             return (

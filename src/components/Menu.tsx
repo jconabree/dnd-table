@@ -9,7 +9,7 @@ enum DrawerTypes {
     INITATIVE
 }
 export const Menu = () => {
-    const drawerRef = useRef<HTMLInputElement>();
+    const drawerRef = useRef<HTMLInputElement>(null);
     const [menuMode, setMenuMode] = useState<DrawerTypes|null>(null);
 
     const handleEffectsClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -93,7 +93,7 @@ export const Menu = () => {
                 </nav>
             </div>
             <div className="drawer-side !pointer-events-none">
-                <div className="bg-base-200 text-base-content min-h-full h-full w-96 p-4 pt-24 relative !pointer-events-auto">
+                <div className="bg-base-200 text-base-content min-h-full w-96 p-4 pr-8 pt-24 relative !pointer-events-auto">
                     <button
                         onClick={handleSidebarClose}
                         type="button"

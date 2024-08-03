@@ -1,4 +1,5 @@
 import { HelmetProvider } from "react-helmet-async";
+// import { DragDropContext } from 'react-beautiful-dnd';
 import ConfiguratorProvider from "~/context/ConfiguratorProvider";
 import { Router } from "~/components/Router";
 
@@ -7,7 +8,9 @@ export const App = () => {
 		<HelmetProvider>
 			<main>
 				<ConfiguratorProvider>
-					<Router />
+					{/* <DragDropContext> */}
+						<Router />
+					{/* </DragDropContext> */}
 				</ConfiguratorProvider>
 			</main>
 		</HelmetProvider>

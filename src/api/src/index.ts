@@ -2,7 +2,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { getAllAreas, saveArea } from './models/areas';
-import { getAllEffects, saveEffect } from './models/effects';
+import { getAllEffects, saveEffect, changeActive } from './models/effects';
 
 dotenv.config();
 
@@ -17,7 +17,8 @@ enum API_ENDPOINTS {
 	AREA_LIST = 'areas/list',
 	AREA_SAVE = 'areas/area',
 	EFFECT_LIST = 'effects/list',
-	EFFECT_SAVE = 'effects/area',
+	EFFECT_SAVE = 'effects/effect',
+	EFFECT_TOGGLE = 'effects/toggle',
 }
 
 app.get(`${API_BASE}`, (req: Request, res: Response) => {
@@ -51,10 +52,16 @@ app.get(`${API_BASE}/${API_ENDPOINTS.EFFECT_LIST}`, (req: Request, res: Response
 
 app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_SAVE}`, (req: Request, res: Response) => {
     const { effect } = req.body;
-	console.log(effect);
 	const savedArea = saveEffect(effect);
 
     res.json(savedArea);
+});
+
+app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_TOGGLE}`, (req: Request, res: Response) => {
+    const { effectId, active } = req.body;
+	const result = changeActive(effectId, active);
+
+    res.json({ success: result });
 });
 
 app.listen(port, () => {
