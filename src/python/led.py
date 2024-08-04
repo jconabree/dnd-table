@@ -13,6 +13,7 @@ def parse_effect(raw):
 
 def show_effect(strip, effect):
     print("show effect based on config")
+    print(effect)
     effectLength = len(effect.effects) - 1
     for index, effectData in enumerate(effect.effects):
         if (effectData.type != "solid"):
