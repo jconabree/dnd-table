@@ -22,14 +22,14 @@ def show_effect(strip, effect):
         solidColorValues = re.sub('[^0-9,]', '', effectData["value"]).split(',')
         strip_manager.colorWipe(strip, effect["nodes"], strip_manager.colorFromRgba(*solidColorValues))
 
-        if (effectData["duration"] < 1):
+        if ("duration" in effectData and effectData["duration"] < 1):
             break
         else:
             time.sleep(effectData["duration"])
-            if (effectData["repeat"] == "infinite"):
+            if ("repeat" in effectData and effectData["repeat"] == "infinite"):
                 print("Implement infinit repeat")
             
-            if (effectData["repeat"].isnumeric()):
+            if ("repeat" in effectData and effectData["repeat"].isnumeric()):
                 print("Implement x repeat")
 
             if (index == effectLength):
