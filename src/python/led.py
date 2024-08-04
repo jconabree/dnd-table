@@ -14,22 +14,22 @@ def parse_effect(raw):
 def show_effect(strip, effect):
     print("show effect based on config")
     print(effect)
-    effectLength = len(effect.effects) - 1
-    for index, effectData in enumerate(effect.effects):
-        if (effectData.type != "solid"):
+    effectLength = len(effect["effects"]) - 1
+    for index, effectData in enumerate(effect["effects"]):
+        if (effectData["type"] != "solid"):
             print("Only supporting solid colors for now")
 
-        solidColorValue = re.sub('[^0-9,]', '', effectData.value)
-        strip_manager.colorWipe(strip, effect.nodes, strip_manager.colorFromRgba(solidColorValue.split(',')))
+        solidColorValue = re.sub('[^0-9,]', '', effectData["value"])
+        strip_manager.colorWipe(strip, effect["nodes"], strip_manager.colorFromRgba(solidColorValue.split(',')))
 
-        if (effectData.duration < 1):
+        if (effectData["duration"] < 1):
             break
         else:
-            time.sleep(effectData.duration)
-            if (effectData.repeat == "infinite"):
+            time.sleep(effectData["duration"])
+            if (effectData["repeat"] == "infinite"):
                 print("Implement infinit repeat")
             
-            if (effectData.repeat.isnumeric()):
+            if (effectData["repeat"].isnumeric()):
                 print("Implement x repeat")
 
             if (index == effectLength):
