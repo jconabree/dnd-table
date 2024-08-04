@@ -28,7 +28,7 @@ def show_effect(strip, effect):
             if (effectData.repeat == "infinite"):
                 print("Implement infinit repeat")
             
-            if (isinstance(effectData.repeat, int)):
+            if (effectData.repeat.isnumeric()):
                 print("Implement x repeat")
 
             if (index == effectLength):
