@@ -33,7 +33,7 @@ def colorWipe(strip, nodes, colorWithBrightness, wait_ms=0):
         print("current pixel range: " + str(i))
 
 def clearStrip(strip):
-    colorWipe(strip, [Color(0,0,0), 255], 10)
+    colorWipe(strip, range(strip.numPixels()), [Color(0,0,0), 255])
 
 def colorFromRgba(r, g, b, a):
     return [Color(r,g,b), round(a * 255)]
