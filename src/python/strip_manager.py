@@ -37,7 +37,7 @@ def clearStrip(strip):
 
 def colorFromRgba(r, g, b, a):
     # For some reason, green and blue are flipped
-    return [Color(int(r), int(b), int(g)), round(int(a) * 255)]
+    return [Color(int(r), int(g), int(b)), round(int(a) * 255)]
 
 # def theaterChase(strip, color, wait_ms=50, iterations=10):
 #     """Movie theater light style chaser animation."""
