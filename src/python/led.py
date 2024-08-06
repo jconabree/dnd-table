@@ -2,7 +2,6 @@ import argparse
 import json
 import time
 import re
-import colorsys
 import strip_manager
 
 def clear_strip(strip):
@@ -37,6 +36,15 @@ def show_effect(strip, effect):
                 strip_manager.clearStrip(strip)
     print(effect)
 
+def percentage_to_rgb(percentage):
+    if not (0 <= percentage <= 100):
+        raise ValueError("Percentage must be between 0 and 100.")
+
+    red = int((percentage / 100) * 255)
+    green = int(255 - ((percentage / 100) * 255))
+    
+    return (red, green, 5)
+
 def show_characters(strip, characters):
     print("show players based on config")
     print(characters)
@@ -48,7 +56,7 @@ def show_characters(strip, characters):
         if (character['maxHealth'] is not None):
             healthPercent = int(character['maxHealth']) / int(character['currentHealth'])
             healthHue = (1 - healthPercent) * 120
-            r, g, b = colorsys.hls_to_rgb(healthHue, 0.5, 1.0)
+            r, g, b = percentage_to_rgb(healthHue, 0.5, 1.0)
             color = strip_manager.colorFromRgba(r, g, b, 1)
             print("max health is defined: " + str(r) + "," + str(g) + "," + str(b))
 
@@ -72,7 +80,7 @@ def show_characters(strip, characters):
     
     # TODO add ability to set the rest of the table's color
     offColor = strip_manager.colorFromRgba(20, 20, 20, 1)
-    strip_manager.inverseColorWipe(strip, uniquePlayerPixels, offColor)
+    # strip_manager.inverseColorWipe(strip, uniquePlayerPixels, offColor)
 
 
 def run():

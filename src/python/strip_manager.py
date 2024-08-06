@@ -43,7 +43,7 @@ def inverseColorWipe(strip, excludeNodes, colorWithBrightness, wait_ms=0):
     strip.setBrightness(brightness)
     print("Inverse colorWipe =====")
     print(excludeNodes)
-    print(color)
+    print(*color)
     print(brightness)
     print("========")
     for i in range(strip.numPixels()):
