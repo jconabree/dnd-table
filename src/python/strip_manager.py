@@ -26,7 +26,8 @@ def colorWipe(strip, nodes, colorWithBrightness, wait_ms=0):
     brightness = colorWithBrightness[1]
     strip.setBrightness(brightness)
     for i in nodes:
-        strip.setPixelColor(i, color)
+        # Always minus one. Base index for app is 1, for strip is 0
+        strip.setPixelColor(i - 1, color)
         strip.show()
         if (wait_ms > 0):
             time.sleep(wait_ms/1000.0)
