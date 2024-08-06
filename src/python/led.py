@@ -46,7 +46,7 @@ def show_characters(strip, characters):
     for character in characters:
         color = whiteColor
         if (character['maxHealth'] is not None):
-            healthPercent = character['maxHealth'] / character['currentHealth']
+            healthPercent = int(character['maxHealth']) / int(character['currentHealth'])
             healthHue = (1 - healthPercent) * 120
             r, g, b = colorsys.hls_to_rgb(healthHue, 0.5, 1.0)
             color = strip_manager.colorFromRgba(r, g, b, 1)
