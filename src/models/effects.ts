@@ -5,7 +5,6 @@ class EffectManager {
 
     async list(): Promise<EffectList['items']> {
         const response = await fetch(`${this.#apiBase}/list`);
-        console.log('fetch response', response);
         const data = await response.json();
 
         return data;
@@ -38,6 +37,22 @@ class EffectManager {
                     effectId: id!,
                     active: isActive
                 }),
+                headers: new Headers({
+                    'content-type': 'application/json'
+                })
+            }
+        );
+        const data = await response.json();
+
+        return data;
+    }
+
+    async clearAll() {
+        const response = await fetch(
+            `${this.#apiBase}/clear`,
+            {
+                method: 'POST',
+                body: '{}',
                 headers: new Headers({
                     'content-type': 'application/json'
                 })

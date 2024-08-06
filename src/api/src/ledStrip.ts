@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { EffectArgumentData } from './types/interface';
+import { CharacterArgumentData, EffectArgumentData } from './types/interface';
 import path from 'node:path';
 
 type PythonArgumentData = {
@@ -14,7 +14,7 @@ class LEDStrip {
         this.#pathToPythonScript = path.join(__dirname, '..', '..', 'python', 'led.py')
     }
 
-    asyncExec(data: PythonArgumentData) {
+    detachedExec(data: PythonArgumentData) {
         const subprocess = spawn('python3',
             [
                 this.#pathToPythonScript,
@@ -39,14 +39,19 @@ class LEDStrip {
     }
 
     turnOnEffect(effectData: EffectArgumentData) {
-        this.asyncExec({
-            'clear': null, // TODO remove this
+        this.detachedExec({
             'effect': JSON.stringify(effectData)
         })
     }
 
+    updateInitiative(characters: CharacterArgumentData[]) {
+        this.detachedExec({
+            'players': JSON.stringify(characters)
+        });
+    }
+
     clearEffects() {
-        this.asyncExec({
+        this.detachedExec({
             'clear': null
         })
     }

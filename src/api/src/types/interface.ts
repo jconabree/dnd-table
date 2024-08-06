@@ -51,3 +51,26 @@ export type EffectArgumentData = {
     nodes: AreaData['nodes'];
     effects: Effect[]
 }
+
+export type Character = {
+    id: string;
+    nickname: string;
+    area: AreaData;
+    initiative: number;
+    showHealth: boolean;
+    health: {
+        max: number;
+        current: number;
+    }
+}
+
+export type CharacterState = Character & {
+    isCurrent: boolean;
+}
+
+export type CharacterArgumentData = {
+    nodes: AreaData['nodes'];
+    isCurrent: boolean;
+    currentHealth: number|null;
+    maxHealth: number|null;
+}

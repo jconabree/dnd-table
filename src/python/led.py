@@ -2,13 +2,14 @@ import argparse
 import json
 import time
 import re
+import colorsys
 import strip_manager
 
 def clear_strip(strip):
     # TODO Read pid file and kill running process
     strip_manager.clearStrip(strip)
 
-def parse_effect(raw):
+def parse_argument(raw):
     return json.loads(raw)
 
 def show_effect(strip, effect):
@@ -36,10 +37,41 @@ def show_effect(strip, effect):
                 strip_manager.clearStrip(strip)
     print(effect)
 
+def show_players(strip, players):
+    print("show players based on config")
+    print(players)
+
+    whiteColor = strip_manager.colorFromRgba(255, 255, 255, 1)
+    declaredPixels = []
+    for player in players:
+        color = whiteColor
+        if (player['maxHealth'] is not None):
+            healthPercent = player['maxHealth'] / player['currentHealth']
+            healthHue = (1 - healthPercent) * 120
+            r, g, b = colorsys.hls_to_rgb(healthHue, 0.5, 1.0)
+            color = strip_manager.colorFromRgba(r, g, b, 1)
+
+        firstNode = players['nodes'][0]
+        lastNode = players['nodes'][-1]
+        healthNodes = players['nodes'][1:-1]
+
+        strip_manager.colorWipe(strip, firstNode, whiteColor)
+        strip_manager.colorWipe(strip, lastNode, whiteColor)
+        strip_manager.colorWipe(strip, healthNodes, color)
+
+    declaredPixels = declaredPixels + players['nodes']
+    uniqueNonPlayerPixels = (list(set(declaredPixels)))
+    
+    # TODO add ability to set the rest of the table's color
+    offColor = strip_manager.colorFromRgba(20, 20, 20, 1)
+    strip_manager.colorWipe(strip, uniqueNonPlayerPixels, offColor)
+
+
 def run():
     parser = argparse.ArgumentParser("LED_Strip")
     parser.add_argument("--clear", help="Clear all active effect", action='store_true')
     parser.add_argument("--effect", help="JSON encoded effect data")
+    parser.add_argument("--players", help="JSON encoded player inititiative data")
     args = parser.parse_args()
 
     strip = strip_manager.initStrip()
@@ -48,8 +80,12 @@ def run():
         clear_strip(strip)
     
     if (args.effect):
-        effect = parse_effect(args.effect)
+        effect = parse_argument(args.effect)
         show_effect(strip, effect)
+    
+    if (args.players):
+        players = parse_argument(args.players)
+        show_players(strip, players)
 
     print("hello world")
 

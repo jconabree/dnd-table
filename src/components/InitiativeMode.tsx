@@ -1,18 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AreaData } from "~/types/interface";
+import { AreaData, Character, CharacterArgumentData } from "~/types/interface";
 import areasModel from '~/models/areas';
-
-type Character = {
-    id: string;
-    nickname: string;
-    area: AreaData;
-    initiative: number;
-    showHealth: boolean;
-    health: {
-        max: number;
-        current: number;
-    }
-}
+import effectsModel from '~/models/effects';
+import initiativeModel from '~/models/initiative';
 
 type InitiativeModeProps = {
     onClose: () => void;
@@ -127,37 +117,48 @@ export default ({ onClose }: InitiativeModeProps) => {
         setUpdateQueue(null);
 
         // TODO if started, poke API and set health info
-    }, [updateQueue]);
+    }, [updateQueue, isStarted]);
 
     const handleStart = useCallback(() => {
         setCurrentTurn(0);
         setIsStarted(true);
-
-        // TODO poke API and send all area/health info with current player indicator
     }, []);
 
     const handleStop = useCallback(() => {
         setCurrentTurn(null);
         setIsStarted(false);
 
-        // TODO poke API and clear effects
+        effectsModel.clearAll();
     }, []);
 
     const handlePrevious = useCallback(() => {
         setCurrentTurn((currentTurnValue) => {
             return currentTurnValue === null || currentTurnValue - 1 < 0 ? characters.length - 1 : currentTurnValue - 1;
         });
-
-        // TODO poke API and send all area/health info with current player indicator
     }, [characters]);
 
     const handleNext = useCallback(() => {
         setCurrentTurn((currentTurnValue) => {
             return currentTurnValue === null || currentTurnValue + 1 >= characters.length ? 0 : currentTurnValue + 1;
         });
-
-        // TODO poke API and send all area/health info with current player indicator
     }, [characters]);
+
+    useEffect(() => {
+        if (!isStarted) {
+            return;
+        }
+
+        const charactersData = orderedCharacters.map<CharacterArgumentData>((character, index) => {
+            return {
+                nodes: character.area.nodes,
+                isCurrent: currentTurn === index,
+                currentHealth: character.health.current,
+                maxHealth: character.health.max,
+            }
+        });
+
+        initiativeModel.pushPlayerStates(charactersData);
+    }, [isStarted, orderedCharacters, currentTurn]);
 
     if (typeof areas === 'undefined') {
         return null;

@@ -54,7 +54,6 @@ export const changeActive = (effectId: EffectData['id']|undefined|null, active: 
         }, {})
 
         const sortedNodes = Object.keys(nodesObject).map((nodeKey) => Number.parseInt(nodeKey)).sort((a, b) => a-b)
-        console.log('sorted nodes', sortedNodes);
     
         const effectData: EffectArgumentData = {
             effects: specifiedEffect.effects,
