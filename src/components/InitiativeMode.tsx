@@ -125,28 +125,38 @@ export default ({ onClose }: InitiativeModeProps) => {
         });
 
         setUpdateQueue(null);
+
+        // TODO if started, poke API and set health info
     }, [updateQueue]);
 
     const handleStart = useCallback(() => {
         setCurrentTurn(0);
         setIsStarted(true);
+
+        // TODO poke API and send all area/health info with current player indicator
     }, []);
 
     const handleStop = useCallback(() => {
         setCurrentTurn(null);
         setIsStarted(false);
+
+        // TODO poke API and clear effects
     }, []);
 
     const handlePrevious = useCallback(() => {
         setCurrentTurn((currentTurnValue) => {
             return currentTurnValue === null || currentTurnValue - 1 < 0 ? characters.length - 1 : currentTurnValue - 1;
         });
+
+        // TODO poke API and send all area/health info with current player indicator
     }, [characters]);
 
     const handleNext = useCallback(() => {
         setCurrentTurn((currentTurnValue) => {
             return currentTurnValue === null || currentTurnValue + 1 >= characters.length ? 0 : currentTurnValue + 1;
         });
+
+        // TODO poke API and send all area/health info with current player indicator
     }, [characters]);
 
     if (typeof areas === 'undefined') {
@@ -159,12 +169,13 @@ export default ({ onClose }: InitiativeModeProps) => {
 
     return (
         <div>
-            <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2 gap-y-4">
+            <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2 gap-y-4 items-center">
                 {!isStarted && (
                     <button
                         onClick={handleStart}
                         type="button"
                         className="btn btn-primary w-full"
+                        disabled={characters.length === 0}
                     >Start</button>
                 )}
                 {isStarted && (
@@ -188,8 +199,8 @@ export default ({ onClose }: InitiativeModeProps) => {
                         </button>
                     </div>
                 )}
-                <details ref={newDropdownRef} className="dropdown w-full">
-                    <summary className="btn btn-primary w-full">New Character</summary>
+                <details ref={newDropdownRef} className={`dropdown w-full ${isStarted ? 'pointer-events-none' : ''}`}>
+                    <summary className={`btn btn-primary w-full ${isStarted ? 'btn-disabled' : ''}`}>New Character</summary>
                     <ul className="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
                         {areas.map((area) => {
                             return (
@@ -208,7 +219,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                 )}
             </div>
             <div className="grid gap-y-8">
-                {orderedCharacters.map((orderCharacter) => {
+                {orderedCharacters.map((orderCharacter, index) => {
                     const updatedCharacter = updateQueue?.find(({ id }) => id === orderCharacter.id);
                     const character: Character = {
                         ...orderCharacter,
@@ -217,12 +228,14 @@ export default ({ onClose }: InitiativeModeProps) => {
                     const showHealth = updatedCharacter?.showHealth ?? character.showHealth;
 
                     return (
-                        <div className="p-4 rounded-lg bg-base-100 text-base-content w-full grid grid-cols-2 gap-x-3 gap-y-8 relative">
-                            <button className="btn btn-error btn-circle btn-sm absolute -top-3 -right-1" onClick={() => { removeCharacter(orderCharacter) }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
-                                    <line xmlns="http://www.w3.org/2000/svg" x1="5" y1="12" x2="19" y2="12"/>
-                                </svg>
-                            </button>
+                        <div className={`p-4 rounded-lg bg-base-100 text-base-content w-full grid grid-cols-2 gap-x-3 gap-y-8 relative border ${currentTurn === index ? 'border-accent' : ' border-base-100'}`}>
+                            {!isStarted && (
+                                <button className="btn btn-error btn-circle btn-sm absolute -top-3 -right-1" onClick={() => { removeCharacter(orderCharacter) }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                                        <line xmlns="http://www.w3.org/2000/svg" x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                </button>
+                            )}
                             <label className="input input-sm input-ghost flex items-center gap-2 col-span-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -234,7 +247,8 @@ export default ({ onClose }: InitiativeModeProps) => {
                                     onChange={(event) => {
                                         updateCharacter(character, 'nickname', event.target.value)
                                     }}
-                                    className="grow w-full"
+                                    disabled={isStarted}
+                                    className="grow w-full disabled:text-accent"
                                 />
                             </label>
                             <label className="input input-sm input-ghost flex items-center gap-2 col-span-1">
@@ -248,6 +262,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                                     onChange={(event) => {
                                         updateCharacter(character, 'initiative', event.target.value)
                                     }}
+                                    disabled={isStarted}
                                     className="grow w-full"
                                 />
                             </label>
@@ -262,6 +277,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                                     onChange={(event) => {
                                         updateCharacter(character, 'showHealth', event.target.checked)
                                     }}
+                                    disabled={isStarted}
                                 />
                             </div>
                             <div className="w-full col-span-1">
