@@ -32,6 +32,17 @@ def colorWipe(strip, nodes, colorWithBrightness, wait_ms=0):
         if (wait_ms > 0):
             time.sleep(wait_ms/1000.0)
 
+def inverseColorWipe(strip, excludeNodes, colorWithBrightness, wait_ms=0):
+    color = colorWithBrightness[0]
+    brightness = colorWithBrightness[1]
+    strip.setBrightness(brightness)
+    for i in range(strip.numPixels()):
+        if (i + 1 not in excludeNodes):
+            strip.setPixelColor(i, color)
+            strip.show()
+            if (wait_ms > 0):
+                time.sleep(wait_ms/1000.0)
+
 def clearStrip(strip):
     colorWipe(strip, range(strip.numPixels()), [Color(0,0,0), 255])
 

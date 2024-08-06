@@ -46,25 +46,32 @@ def show_characters(strip, characters):
     for character in characters:
         color = whiteColor
         if (character['maxHealth'] is not None):
+            print("max health is defined")
             healthPercent = int(character['maxHealth']) / int(character['currentHealth'])
             healthHue = (1 - healthPercent) * 120
             r, g, b = colorsys.hls_to_rgb(healthHue, 0.5, 1.0)
             color = strip_manager.colorFromRgba(r, g, b, 1)
 
-        firstNode = range(character['nodes'][0])
-        lastNode = range(character['nodes'][-1])
-        healthNodes = character['nodes'][1:-1]
+        print("color")
+        print(color)
 
-        strip_manager.colorWipe(strip, firstNode, whiteColor)
-        strip_manager.colorWipe(strip, lastNode, whiteColor)
-        strip_manager.colorWipe(strip, healthNodes, color)
+        if (character["isCurrent"]):
+            firstNode = range(character['nodes'][0])
+            lastNode = range(character['nodes'][-1])
+            healthNodes = character['nodes'][1:-1]
+
+            strip_manager.colorWipe(strip, firstNode, whiteColor)
+            strip_manager.colorWipe(strip, lastNode, whiteColor)
+            strip_manager.colorWipe(strip, healthNodes, color)
+        else:
+            strip_manager.colorWipe(strip, character['nodes'], color)
 
     declaredPixels = declaredPixels + character['nodes']
-    uniqueNonPlayerPixels = (list(set(declaredPixels)))
+    uniquePlayerPixels = (list(set(declaredPixels)))
     
     # TODO add ability to set the rest of the table's color
     offColor = strip_manager.colorFromRgba(20, 20, 20, 1)
-    strip_manager.colorWipe(strip, uniqueNonPlayerPixels, offColor)
+    strip_manager.inverseColorWipe(strip, uniquePlayerPixels, offColor)
 
 
 def run():
