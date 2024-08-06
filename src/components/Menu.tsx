@@ -93,7 +93,7 @@ export const Menu = () => {
                 </nav>
             </div>
             <div className="drawer-side !pointer-events-none">
-                <div className="bg-base-200 text-base-content min-h-full w-96 p-4 pt-24 right-4 relative !pointer-events-auto">
+                <div className={`bg-base-200 text-base-content min-h-full w-96 p-4 pt-24 relative !pointer-events-auto ${drawerRef.current?.checked && 'right-4'}`}>
                     <button
                         onClick={handleSidebarClose}
                         type="button"
