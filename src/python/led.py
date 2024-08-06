@@ -25,7 +25,7 @@ def show_effect(strip, effect):
 
         if ("duration" in effectData and effectData["duration"] < 1):
             break
-        else:
+        elif ("duration" in effectData):
             time.sleep(effectData["duration"])
             if ("repeat" in effectData and effectData["repeat"] == "infinite"):
                 print("Implement infinit repeat")
@@ -51,8 +51,8 @@ def show_characters(strip, characters):
             r, g, b = colorsys.hls_to_rgb(healthHue, 0.5, 1.0)
             color = strip_manager.colorFromRgba(r, g, b, 1)
 
-        firstNode = character['nodes'][0]
-        lastNode = character['nodes'][-1]
+        firstNode = range(character['nodes'][0])
+        lastNode = range(character['nodes'][-1])
         healthNodes = character['nodes'][1:-1]
 
         strip_manager.colorWipe(strip, firstNode, whiteColor)

@@ -30,7 +30,6 @@ def colorWipe(strip, nodes, colorWithBrightness, wait_ms=0):
         strip.show()
         if (wait_ms > 0):
             time.sleep(wait_ms/1000.0)
-        print("current pixel range: " + str(i))
 
 def clearStrip(strip):
     colorWipe(strip, range(strip.numPixels()), [Color(0,0,0), 255])
