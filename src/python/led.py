@@ -50,16 +50,16 @@ def show_characters(strip, characters):
             healthHue = (1 - healthPercent) * 120
             r, g, b = colorsys.hls_to_rgb(healthHue, 0.5, 1.0)
             color = strip_manager.colorFromRgba(r, g, b, 1)
-            print("max health is defined: " + r + "," + g + "," + b )
+            print("max health is defined: " + str(r) + "," + str(g) + "," + str(b))
 
         if (character["isCurrent"]):
             print("is current")
             firstNode = range(character['nodes'][0])
             lastNode = range(character['nodes'][-1])
             healthNodes = character['nodes'][1:-1]
-            print("firstNode:" + firstNode)
-            print("lastNode:" + lastNode)
-            print("healthNodes:" + healthNodes)
+            print("firstNode: ".join(str(x) for x in firstNode))
+            print("lastNode: ".join(str(x) for x in lastNode))
+            print("healthNodes: ".join(str(x) for x in healthNodes))
 
             strip_manager.colorWipe(strip, firstNode, whiteColor)
             strip_manager.colorWipe(strip, lastNode, whiteColor)

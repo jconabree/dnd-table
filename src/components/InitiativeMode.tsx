@@ -75,7 +75,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                 ...character,
                 health: {
                     ...character.health,
-                    [healthKey]: value
+                    [healthKey]: Number.parseInt(value as string)
                 }
             }
         } else {
@@ -152,8 +152,8 @@ export default ({ onClose }: InitiativeModeProps) => {
             return {
                 nodes: character.area.nodes,
                 isCurrent: currentTurn === index,
-                currentHealth: character.health.current,
-                maxHealth: character.health.max,
+                currentHealth: character.showHealth ? null : character.health.current,
+                maxHealth: character.showHealth ? null : character.health.max,
             }
         });
 
