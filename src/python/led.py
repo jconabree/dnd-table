@@ -61,12 +61,12 @@ def show_characters(strip, characters):
 
         if (character["isCurrent"]):
             print("is current")
-            firstNode = range(character['nodes'][0])
-            lastNode = range(character['nodes'][-1])
+            firstNode = [character['nodes'][0]]
+            lastNode = [character['nodes'][-1]]
             healthNodes = character['nodes'][1:-1]
-            print("firstNode: ".join(str(x) for x in firstNode))
-            print("lastNode: ".join(str(x) for x in lastNode))
-            print("healthNodes: ".join(str(x) for x in healthNodes))
+            print("First Node: " + "".join(str(x) for x in firstNode))
+            print("Last Node: " + "".join(str(x) for x in lastNode))
+            print("Health Nodes: " + "".join(str(x) for x in healthNodes))
 
             strip_manager.colorWipe(strip, firstNode, whiteColor)
             strip_manager.colorWipe(strip, lastNode, whiteColor)
