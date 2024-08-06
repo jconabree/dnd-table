@@ -37,29 +37,29 @@ def show_effect(strip, effect):
                 strip_manager.clearStrip(strip)
     print(effect)
 
-def show_players(strip, players):
+def show_characters(strip, characters):
     print("show players based on config")
-    print(players)
+    print(characters)
 
     whiteColor = strip_manager.colorFromRgba(255, 255, 255, 1)
     declaredPixels = []
-    for player in players:
+    for character in characters:
         color = whiteColor
-        if (player['maxHealth'] is not None):
-            healthPercent = player['maxHealth'] / player['currentHealth']
+        if (character['maxHealth'] is not None):
+            healthPercent = character['maxHealth'] / character['currentHealth']
             healthHue = (1 - healthPercent) * 120
             r, g, b = colorsys.hls_to_rgb(healthHue, 0.5, 1.0)
             color = strip_manager.colorFromRgba(r, g, b, 1)
 
-        firstNode = players['nodes'][0]
-        lastNode = players['nodes'][-1]
-        healthNodes = players['nodes'][1:-1]
+        firstNode = character['nodes'][0]
+        lastNode = character['nodes'][-1]
+        healthNodes = character['nodes'][1:-1]
 
         strip_manager.colorWipe(strip, firstNode, whiteColor)
         strip_manager.colorWipe(strip, lastNode, whiteColor)
         strip_manager.colorWipe(strip, healthNodes, color)
 
-    declaredPixels = declaredPixels + players['nodes']
+    declaredPixels = declaredPixels + character['nodes']
     uniqueNonPlayerPixels = (list(set(declaredPixels)))
     
     # TODO add ability to set the rest of the table's color
@@ -71,7 +71,7 @@ def run():
     parser = argparse.ArgumentParser("LED_Strip")
     parser.add_argument("--clear", help="Clear all active effect", action='store_true')
     parser.add_argument("--effect", help="JSON encoded effect data")
-    parser.add_argument("--players", help="JSON encoded player inititiative data")
+    parser.add_argument("--characters", help="JSON encoded player inititiative data")
     args = parser.parse_args()
 
     strip = strip_manager.initStrip()
@@ -83,9 +83,9 @@ def run():
         effect = parse_argument(args.effect)
         show_effect(strip, effect)
     
-    if (args.players):
-        players = parse_argument(args.players)
-        show_players(strip, players)
+    if (args.characters):
+        characters = parse_argument(args.characters)
+        show_characters(strip, characters)
 
     print("hello world")
 

@@ -1,6 +1,7 @@
 import { CharacterArgumentData } from "~/types/interface";
-import ledStrip from "~/ledStrip";
+import ledStrip from "../ledStrip";
 
-export const publishPlayerStates = (characters: CharacterArgumentData[]) => {
+export const publishCharacterStates = (characters: CharacterArgumentData[]) => {
     ledStrip.updateInitiative(characters);
+    console.log('updating player states', characters)
 }

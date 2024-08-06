@@ -157,7 +157,7 @@ export default ({ onClose }: InitiativeModeProps) => {
             }
         });
 
-        initiativeModel.pushPlayerStates(charactersData);
+        initiativeModel.pushCharacterStates(charactersData);
     }, [isStarted, orderedCharacters, currentTurn]);
 
     if (typeof areas === 'undefined') {

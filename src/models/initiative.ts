@@ -3,7 +3,7 @@ import { CharacterArgumentData } from "~/types/interface";
 class InitiativeModel {
     #apiBase: string = '/api/initiative';
 
-    async pushPlayerStates(characters: CharacterArgumentData[]) {
+    async pushCharacterStates(characters: CharacterArgumentData[]) {
         const response = await fetch(
             `${this.#apiBase}/states`,
             {

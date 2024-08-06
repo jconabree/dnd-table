@@ -3,7 +3,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { getAllAreas, saveArea } from './models/areas';
 import { getAllEffects, saveEffect, changeActive } from './models/effects';
-import { publishPlayerStates } from "./models/initiative";
+import { publishCharacterStates } from "./models/initiative";
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ enum API_ENDPOINTS {
 	EFFECT_SAVE = 'effects/effect',
 	EFFECT_TOGGLE = 'effects/toggle',
 	EFFECT_CLEAR = 'effects/clear',
-	INITIATIVE_STATE = 'initiative/state',
+	INITIATIVE_STATES = 'initiative/states',
 }
 
 app.get(`${API_BASE}`, (req: Request, res: Response) => {
@@ -73,9 +73,9 @@ app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_CLEAR}`, (req: Request, res: Respon
     res.json({ success: result });
 });
 
-app.post(`${API_BASE}/${API_ENDPOINTS.INITIATIVE_STATE}`, (req: Request, res: Response) => {
-	const { players } = req.body;
-	publishPlayerStates(players);
+app.post(`${API_BASE}/${API_ENDPOINTS.INITIATIVE_STATES}`, (req: Request, res: Response) => {
+	const { characters } = req.body;
+	publishCharacterStates(characters);
 
     res.json({ success: true });
 });

@@ -46,7 +46,7 @@ class LEDStrip {
 
     updateInitiative(characters: CharacterArgumentData[]) {
         this.detachedExec({
-            'players': JSON.stringify(characters)
+            'characters': JSON.stringify(characters)
         });
     }
 
