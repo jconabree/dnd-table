@@ -40,8 +40,8 @@ def percentage_to_rgb(percentage):
     if not (0 <= percentage <= 100):
         raise ValueError("Percentage must be between 0 and 100.")
 
-    red = int((percentage / 100) * 255)
-    green = int(255 - ((percentage / 100) * 255))
+    green = int((percentage / 100) * 255)
+    red = int(255 - ((percentage / 100) * 255))
     
     return (red, green, 5)
 
