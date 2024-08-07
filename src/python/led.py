@@ -54,7 +54,7 @@ def show_characters(strip, characters):
     for character in characters:
         color = whiteColor
         if (character['maxHealth'] is not None):
-            healthPercent = (int(character['maxHealth']) / int(character['currentHealth'])) * 100
+            healthPercent = (int(character['currentHealth'] / int(character['maxHealth']))) * 100
             r, g, b = percentage_to_rgb(healthPercent)
             color = strip_manager.colorFromRgba(r, g, b, 1)
             print("max health is defined: " + str(r) + "," + str(g) + "," + str(b))
