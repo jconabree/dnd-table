@@ -50,6 +50,7 @@ def show_characters(strip, characters):
     print(characters)
 
     whiteColor = strip_manager.colorFromRgba(255, 255, 255, 1)
+    whiteHighlightColor = strip_manager.colorFromRgba(177, 6, 201, 1)
     declaredPixels = []
     for character in characters:
         color = whiteColor
@@ -68,8 +69,9 @@ def show_characters(strip, characters):
             print("Last Node: " + "".join(str(x) for x in lastNode))
             print("Health Nodes: " + "".join(str(x) for x in healthNodes))
 
-            strip_manager.colorWipe(strip, firstNode, whiteColor)
-            strip_manager.colorWipe(strip, lastNode, whiteColor)
+            highlightColor = whiteColor if character['maxHealth'] is not None else whiteHighlightColor
+            strip_manager.colorWipe(strip, firstNode, highlightColor)
+            strip_manager.colorWipe(strip, lastNode, highlightColor)
             strip_manager.colorWipe(strip, healthNodes, color)
         else:
             strip_manager.colorWipe(strip, character['nodes'], color)
