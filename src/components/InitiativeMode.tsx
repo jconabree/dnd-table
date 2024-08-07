@@ -115,8 +115,6 @@ export default ({ onClose }: InitiativeModeProps) => {
         });
 
         setUpdateQueue(null);
-
-        // TODO if started, poke API and set health info
     }, [updateQueue, isStarted]);
 
     const handleStart = useCallback(() => {
@@ -152,8 +150,8 @@ export default ({ onClose }: InitiativeModeProps) => {
             return {
                 nodes: character.area.nodes,
                 isCurrent: currentTurn === index,
-                currentHealth: character.showHealth ? null : character.health.current,
-                maxHealth: character.showHealth ? null : character.health.max,
+                currentHealth: character.showHealth ? character.health.current : null,
+                maxHealth: character.showHealth ? character.health.current:  null,
             }
         });
 
