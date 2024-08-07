@@ -151,7 +151,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                 nodes: character.area.nodes,
                 isCurrent: currentTurn === index,
                 currentHealth: character.showHealth ? character.health.current : null,
-                maxHealth: character.showHealth ? character.health.current:  null,
+                maxHealth: character.showHealth ? character.health.max:  null,
             }
         });
 
