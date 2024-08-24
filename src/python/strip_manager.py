@@ -6,6 +6,7 @@
 # various animations on a strip of NeoPixels.
 
 import time
+import json
 from rpi_ws281x import *
 
 # LED strip configuration:
@@ -108,6 +109,14 @@ def colorFromRgba(r, g, b, a):
 #             for i in range(0, strip.numPixels(), 3):
 #                 strip.setPixelColor(i+q, 0)
 
+def getLedCount(nodeCount):    
+    count = 0
+    count += nodeCount['bottom'] or 0
+    count += nodeCount['right'] or 0
+    count += nodeCount['top'] or 0
+    count += nodeCount['left'] or 0
+
+
 # Main program logic follows:
 def initStrip():
     # Process arguments
@@ -116,32 +125,16 @@ def initStrip():
     # args = parser.parse_args()
 
     # Create NeoPixel object with appropriate configuration.
-    strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
+    with open('../storage/config.json') as config_data:
+        config = json.loads(config_data)
+        config_data.close()
+        ledCount = LED_COUNT
+        if (config['nodeCount']):
+            ledCount = getLedCount(config['nodeCount'])
+
+    
+    strip = Adafruit_NeoPixel(ledCount, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
     # Intialize the library (must be called once before other functions).
     strip.begin()
 
     return strip
-
-    # print ('Press Ctrl-C to quit.')
-    # if not args.clear:
-    #     print('Use "-c" argument to clear LEDs on exit')
-
-    # try:
-
-    #     while True:
-    #         print ('Color wipe animations.')
-    #         colorWipe(strip, Color(255, 0, 0))  # Red wipe
-    #         colorWipe(strip, Color(0, 255, 0))  # Blue wipe
-    #         colorWipe(strip, Color(0, 0, 255))  # Green wipe
-    #         print ('Theater chase animations.')
-    #         theaterChase(strip, Color(127, 127, 127))  # White theater chase
-    #         theaterChase(strip, Color(127,   0,   0))  # Red theater chase
-    #         theaterChase(strip, Color(  0,   0, 127))  # Blue theater chase
-    #         print ('Rainbow animations.')
-    #         rainbow(strip)
-    #         rainbowCycle(strip)
-    #         theaterChaseRainbow(strip)
-
-    # except KeyboardInterrupt:
-    #     if args.clear:
-    #         colorWipe(strip, Color(0,0,0), 10)
