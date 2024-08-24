@@ -112,10 +112,10 @@ def colorFromRgba(r, g, b, a):
 
 def getLedCount(nodeCount):    
     count = 0
-    count += nodeCount['bottom'] or 0
-    count += nodeCount['right'] or 0
-    count += nodeCount['top'] or 0
-    count += nodeCount['left'] or 0
+    count += (nodeCount['bottom'] or 0)
+    count += (nodeCount['right'] or 0)
+    count += (nodeCount['top'] or 0)
+    count += (nodeCount['left'] or 0)
 
 
 # Main program logic follows:
@@ -130,6 +130,7 @@ def initStrip():
         ledCount = LED_COUNT
         if (config['nodeCount']):
             ledCount = getLedCount(config['nodeCount'])
+            print("ledCount: " + str(ledCount))
 
     
     strip = Adafruit_NeoPixel(ledCount, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
