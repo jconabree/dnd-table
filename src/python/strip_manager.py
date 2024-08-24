@@ -125,7 +125,7 @@ def initStrip():
 
     # Create NeoPixel object with appropriate configuration.
     with open(config_path) as config_data:
-        config = json.loads(config_data)
+        config = json.load(config_data)
         config_data.close()
         ledCount = LED_COUNT
         if (config['nodeCount']):
