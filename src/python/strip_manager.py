@@ -8,6 +8,7 @@
 import time
 import json
 from rpi_ws281x import *
+import os
 
 # LED strip configuration:
 LED_COUNT      = 94     # Number of LED pixels.
@@ -119,13 +120,11 @@ def getLedCount(nodeCount):
 
 # Main program logic follows:
 def initStrip():
-    # Process arguments
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-c', '--clear', action='store_true', help='clear the display on exit')
-    # args = parser.parse_args()
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    config_path = os.path.join(dir_path, "..", "storage", "config.json")
 
     # Create NeoPixel object with appropriate configuration.
-    with open('../storage/config.json') as config_data:
+    with open(config_path) as config_data:
         config = json.loads(config_data)
         config_data.close()
         ledCount = LED_COUNT
