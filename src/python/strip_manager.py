@@ -117,6 +117,8 @@ def getLedCount(nodeCount):
     count += (nodeCount['top'] or 0)
     count += (nodeCount['left'] or 0)
 
+    return count
+
 
 # Main program logic follows:
 def initStrip():
