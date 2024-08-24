@@ -23,6 +23,8 @@ def show_effect(strip, effect):
             print("Only supporting solid colors for now")
 
         solidColorValues = parse_color_string(effectData["value"])
+        print("solid color value")
+        print(solidColorValues)
         strip_manager.colorWipe(strip, effect["nodes"], strip_manager.colorFromRgba(*solidColorValues))
 
         if ("duration" in effectData and effectData["duration"] < 1):
