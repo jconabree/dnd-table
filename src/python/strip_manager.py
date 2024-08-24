@@ -121,7 +121,8 @@ def getLedCount(nodeCount):
 # Main program logic follows:
 def initStrip():
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    config_path = os.path.join(dir_path, "..", "storage", "config.json")
+    root_path = os.path.dirname(dir_path)
+    config_path = os.path.join(root_path, "storage", "config.json")
 
     # Create NeoPixel object with appropriate configuration.
     with open(config_path) as config_data:
