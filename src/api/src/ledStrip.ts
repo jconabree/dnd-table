@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { CharacterArgumentData, EffectArgumentData } from './types/interface';
+import { CharacterArgumentData, EffectArgumentData, NodesArgumentData } from './types/interface';
 import path from 'node:path';
 
 type PythonArgumentData = {
@@ -50,7 +50,13 @@ class LEDStrip {
         });
     }
 
-    clearEffects() {
+    highlightNodes(nodes: NodesArgumentData) {
+        this.detachedExec({
+            'highlights': JSON.stringify(nodes),
+        })
+    }
+
+    clearAll() {
         this.detachedExec({
             'clear': null
         })

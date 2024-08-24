@@ -2,8 +2,10 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { getAllAreas, saveArea } from './models/areas';
+import { getConfig, saveConfig } from './models/configurations';
 import { getAllEffects, saveEffect, changeActive } from './models/effects';
 import { publishCharacterStates } from "./models/initiative";
+import { highlightNodes, clearAll } from "./models/nodes";
 
 dotenv.config();
 
@@ -15,13 +17,16 @@ const API_BASE = '/api';
 app.use(express.json());
 
 enum API_ENDPOINTS {
-	AREA_LIST = 'areas/list',
+	AREA_LIST = 'areas',
 	AREA_SAVE = 'areas/area',
-	EFFECT_LIST = 'effects/list',
+	CLEAR = 'clear',
+	CONFIG_GET = 'config',
+	CONFIG_SAVE = 'config',
+	EFFECT_LIST = 'effects',
 	EFFECT_SAVE = 'effects/effect',
 	EFFECT_TOGGLE = 'effects/toggle',
-	EFFECT_CLEAR = 'effects/clear',
 	INITIATIVE_STATES = 'initiative/states',
+	HIGHLIGHT_NODES = 'nodes/highlight',
 }
 
 app.get(`${API_BASE}`, (req: Request, res: Response) => {
@@ -67,8 +72,15 @@ app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_TOGGLE}`, (req: Request, res: Respo
     res.json({ success: result });
 });
 
-app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_CLEAR}`, (req: Request, res: Response) => {
-	const result = changeActive(null, false);
+app.post(`${API_BASE}/${API_ENDPOINTS.CLEAR}`, (req: Request, res: Response) => {
+	const result = clearAll();
+
+    res.json({ success: result });
+});
+
+app.post(`${API_BASE}/${API_ENDPOINTS.HIGHLIGHT_NODES}`, (req: Request, res: Response) => {
+	const { nodes, color } = req.body;
+	const result = highlightNodes(nodes, color);
 
     res.json({ success: result });
 });
@@ -78,6 +90,19 @@ app.post(`${API_BASE}/${API_ENDPOINTS.INITIATIVE_STATES}`, (req: Request, res: R
 	publishCharacterStates(characters);
 
     res.json({ success: true });
+});
+
+app.get(`${API_BASE}/${API_ENDPOINTS.CONFIG_GET}`, (req: Request, res: Response) => {
+	const config = getConfig();
+
+    res.json({ config });
+});
+
+app.post(`${API_BASE}/${API_ENDPOINTS.CONFIG_SAVE}`, (req: Request, res: Response) => {
+	const config = req.body;
+	const success = saveConfig(config);
+
+    res.json({ success });
 });
 
 app.listen(port, () => {

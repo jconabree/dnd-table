@@ -42,6 +42,23 @@ class Entity<DataStructure extends LooseData|LooseDataWithItems> implements Enti
         return this._data;
     }
 
+    setData(data: DataStructure): Entity<DataStructure> {
+        this._data = {
+            ...data
+        };
+
+        return this;
+    }
+
+    updateData(data: Partial<DataStructure>): Entity<DataStructure> {
+        this._data = {
+            ...this._data,
+            ...data
+        };
+
+        return this;
+    }
+
     setStorage(storage: Storage): Entity<DataStructure> {
         this.storage = storage;
 

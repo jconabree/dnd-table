@@ -1,10 +1,11 @@
 import { EffectData, EffectList } from '~/types/interface';
+import nodesManager from './nodes';
 
 class EffectManager {
     #apiBase = '/api/effects';
 
     async list(): Promise<EffectList['items']> {
-        const response = await fetch(`${this.#apiBase}/list`);
+        const response = await fetch(this.#apiBase);
         const data = await response.json();
 
         return data;
@@ -47,20 +48,8 @@ class EffectManager {
         return data;
     }
 
-    async clearAll() {
-        const response = await fetch(
-            `${this.#apiBase}/clear`,
-            {
-                method: 'POST',
-                body: '{}',
-                headers: new Headers({
-                    'content-type': 'application/json'
-                })
-            }
-        );
-        const data = await response.json();
-
-        return data;
+    clearAll() {
+        return nodesManager.clearAll();
     }
 }
 

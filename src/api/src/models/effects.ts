@@ -17,7 +17,6 @@ export const getAllEffects = () => {
 export const saveEffect = (data: EffectData) => {
     const model = loadData();
 
-    console.log('effect being saved', data);
     const savedItem = model.saveItem<EffectData>(data);
 
     return savedItem;
@@ -26,7 +25,7 @@ export const saveEffect = (data: EffectData) => {
 export const changeActive = (effectId: EffectData['id']|undefined|null, active: boolean): boolean => {
     if (!active || !effectId) {
         // TODO eventually be smarter and clear only specified effect and fallback to other active effect
-        ledStrip.clearEffects();
+        ledStrip.clearAll();
 
         return true;
     }

@@ -4,7 +4,8 @@ export type AreaData = {
     id?: AreaID;
     name: string;
     type: 'dndplayer'|'player'|'basic';
-    nodes: number[]
+    nodes: number[];
+    highlightColor?: ColorValue;
     savedAt?: number;
     createdAt?: number;
 };
@@ -68,4 +69,18 @@ export type CharacterArgumentData = {
     isCurrent: boolean;
     currentHealth: number|null;
     maxHealth: number|null;
+}
+
+export type NodesArgumentData = {
+    nodes: AreaData['nodes'];
+    color?: ColorValue;
+}
+
+export type TableConfiguration = {
+    nodeCount: {
+        bottom: number
+        right: number,
+        top: number,
+        left: number
+    }
 }

@@ -1,4 +1,5 @@
 import { AreaData, AreaList } from '~/types/interface';
+import nodesManager from './nodes';
 
 class AreaManager {
     #apiBase = '/api/areas';
@@ -6,7 +7,7 @@ class AreaManager {
 
     async list(): Promise<AreaList['items']> {
         if (!this.#cache) {
-            const response = await fetch(`${this.#apiBase}/list`);
+            const response = await fetch(this.#apiBase);
             console.log('fetch response', response);
             this.#cache = await response.json();
         }
@@ -31,6 +32,20 @@ class AreaManager {
         const data = await response.json();
 
         return data;
+    }
+
+    async show(area: AreaData) {
+        const { nodes, highlightColor: color } = area;
+        const data = await nodesManager.highlight({
+            nodes,
+            color
+        });
+
+        return data;
+    }
+
+    async hide() {
+        await nodesManager.clearAll();
     }
 }
 

@@ -74,3 +74,17 @@ export type CharacterArgumentData = {
     currentHealth: number|null;
     maxHealth: number|null;
 }
+
+export type NodesArgumentData = {
+    nodes: AreaData['nodes'];
+    color: ColorValue;
+}
+
+export type TableConfiguration = {
+    nodeCount: {
+        bottom: number
+        right: number,
+        top: number,
+        left: number
+    }
+}
