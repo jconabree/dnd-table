@@ -1,3 +1,5 @@
+import { TableConfiguration } from "~/types/interface";
+
 type coord = {
     x: number;
     y: number;
@@ -35,6 +37,12 @@ export default class TableCanvas {
     realTableWidth: number = 48;
     realTableHeight = 72;
     tableLineWidth = 15;
+    nodeCounts = {
+        bottom: 0,
+        right: 0,
+        top: 0,
+        left: 0
+    };
     ledChunks: LEDChunk[] = [];
     selectedRangeStart: LEDID|null = null;
     selectedRangeEnd: LEDID|null = null;
@@ -46,11 +54,12 @@ export default class TableCanvas {
         this.#canvas = canvas;
     }
 
-    init(): void {
+    init(nodeCountConfig: TableConfiguration['nodeCount']): void {
         globalThis.addEventListener('resize', () => {
             this.resize();
             this.draw();
         });
+        this.setNodeCount(nodeCountConfig, false);
         this.resize();
         this.bindChunkHover();
         this.draw();
@@ -70,6 +79,22 @@ export default class TableCanvas {
         }
 
         this.draw();
+    }
+
+    setNodeCount(nodeCountConfig: TableConfiguration['nodeCount'], redraw = true) {
+        const { bottom, right, top, left } = nodeCountConfig || {};
+        const { bottom: fallbackBottom, right: fallbackRight, top: fallbackTop, left: fallbackLeft } = this.nodeCounts;
+        this.nodeCounts = {
+            bottom: bottom ?? fallbackBottom,
+            right: right ?? fallbackRight,
+            top: top ?? fallbackTop,
+            left: left ?? fallbackLeft,
+        };
+
+        if (redraw) {
+            this.calculateLEDChunkPositions();
+            this.draw();
+        }
     }
 
     resize(): void {
@@ -135,33 +160,37 @@ export default class TableCanvas {
                 end: tableCoords.bottomRight.x,
                 direction: 'x',
                 static: tableCoords.bottomLeft.y,
-                numberOfNodes: 18
+                numberOfNodes: this.nodeCounts.bottom ?? 0
             },
             { // Right Line
                 start: tableCoords.bottomRight.y,
                 end: tableCoords.topRight.y + this.tableLineWidth,
                 direction: 'y',
                 static: tableCoords.bottomRight.x,
-                numberOfNodes: 29
+                numberOfNodes: this.nodeCounts.right ?? 0
             },
             { // Top Line
                 start: tableCoords.topRight.x,
                 end: tableCoords.topLeft.x + this.tableLineWidth,
                 direction: 'x',
                 static: tableCoords.topRight.y + this.tableLineWidth,
-                numberOfNodes: 18
+                numberOfNodes: this.nodeCounts.top ?? 0
             },
             { // Left Line
                 start: tableCoords.topLeft.y + this.tableLineWidth,
                 end: tableCoords.bottomLeft.y,
                 direction: 'y',
                 static: tableCoords.topLeft.x + this.tableLineWidth,
-                numberOfNodes: 29
+                numberOfNodes: this.nodeCounts.left ?? 0
             }
         ]
 
         let id = 1;
         paths.forEach((path) => {
+            if (!path.numberOfNodes) {
+                return;
+            }
+
             const isLtr = path.start < path.end;
             let nodeCount = 0;
             const totalLength = Math.abs(path.end - path.start);

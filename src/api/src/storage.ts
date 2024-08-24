@@ -91,6 +91,16 @@ class Entity<DataStructure extends LooseData|LooseDataWithItems> implements Enti
         return item;
     }
 
+    deleteItem(itemId: BasicItemData['id']) {
+        this.data.items = [
+            ...(this.data.items || []).filter((existingItem: BasicItemData) => {
+                return itemId !== existingItem.id;
+            }),
+        ]
+
+        this.save();
+    }
+
     save(): void {
         this.setIsNew(false);
         

@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import EffectList from '~/components/EffectList';
 import Configurations from '~/components/Configurations';
 import InitiativeMode from '~/components/InitiativeMode';
-import ListAreas from '~/components/ListAreas';
+import AreaList from '~/components/AreaList';
 
 enum DrawerTypes {
     EFFECTS,
@@ -117,7 +117,7 @@ export const Menu = () => {
                 </nav>
             </div>
             <div className="drawer-side !pointer-events-none">
-                <div className={`bg-base-200 text-base-content min-h-full w-96 p-4 pt-24 relative !pointer-events-auto ${drawerRef.current?.checked && 'right-4'}`}>
+                <div className={`bg-base-200 text-base-content min-h-full w-96 p-4 pt-24 pb-16 relative !pointer-events-auto ${drawerRef.current?.checked && 'right-4'}`}>
                     <button
                         onClick={handleSidebarClose}
                         type="button"
@@ -127,7 +127,7 @@ export const Menu = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                     {drawerRef.current?.checked && menuMode === DrawerTypes.AREAS ? (
-                        <ListAreas onClose={handleSidebarClose} />
+                        <AreaList onClose={handleSidebarClose} />
                     ) : null}
                     {drawerRef.current?.checked && menuMode === DrawerTypes.EFFECTS ? (
                         <EffectList onClose={handleSidebarClose} />

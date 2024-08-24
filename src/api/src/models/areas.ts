@@ -19,3 +19,8 @@ export const saveArea = (areaData: AreaData) => {
 
     return savedItem;
 }
+
+export const deleteArea = (areaId: AreaData['id']) => {
+    const areaModel = loadData();
+    areaModel.deleteItem(areaId);
+}

@@ -7,20 +7,20 @@ export function Table() {
     const tableCanvas = useRef<TableCanvas>();
     const selectionSetByCanvas = useRef<boolean>(true);
     const [isReady, setIsReady] = useState<boolean>(false);
-    const { isSelectMode, setSelection, selection } = useConfiguratorContext();
+    const { isSelectMode, setSelection, selection, config } = useConfiguratorContext();
 
     useEffect(() => {
         setIsReady(true);
     }, []);
 
     useEffect(() => {
-        if (!isReady) {
+        if (!isReady || !config) {
             return;
         }
 
         tableCanvas.current = new TableCanvas(canvasRef.current!);
-        tableCanvas.current.init();
-    }, [isReady]);
+        tableCanvas.current.init(config.nodeCount);
+    }, [isReady, config]);
 
     useEffect(() => {
         if (!tableCanvas.current) {
@@ -42,15 +42,23 @@ export function Table() {
     }, [isSelectMode]);
 
     useEffect(() => {
-        if (!isReady) {
+        if (!isReady || !tableCanvas.current) {
             return;
         }
 
         if (!selectionSetByCanvas.current) {
-            tableCanvas.current!.setSelection(selection!);
+            tableCanvas.current.setSelection(selection!);
         }
         selectionSetByCanvas.current = false;
     }, [selection, isReady]);
+
+    useEffect(() => {
+        if (!tableCanvas.current || !config) {
+            return;
+        }
+
+        tableCanvas.current.setNodeCount(config.nodeCount);
+    }, [config?.nodeCount])
 
     return (
         <>

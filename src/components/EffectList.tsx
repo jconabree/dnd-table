@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import effectsModel from "../models/effects";
+import nodesModel from '~/models/nodes';
 import { EffectData } from '../types/interface';
 import ToggleView from './ToggleView';
 import EditEffect from './EditEffect';
@@ -26,6 +27,10 @@ export default ({ onClose }: EffectListProps) => {
         setShowEditForm(false);
     }, []);
 
+    const handleClearAll = useCallback(() => {
+        nodesModel.clearAll();
+    }, []);
+
     const loadList = useCallback(async () => {
         const items: EffectListingItem[] = await effectsModel.list();
         console.log('response', items);
@@ -37,7 +42,12 @@ export default ({ onClose }: EffectListProps) => {
                 return item;
             })
         });
-    }, [])
+    }, []);
+
+    const handleDeleteItem = useCallback((itemId: string) => {
+        effectsModel.delete(itemId);
+        loadList();
+    }, []);
 
     useEffect(() => {
         loadList();
@@ -69,7 +79,7 @@ export default ({ onClose }: EffectListProps) => {
         <div>
             <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2">
                 <button
-                    onClick={() => console.log('implement clear all')}
+                    onClick={handleClearAll}
                     type="button"
                     className="btn btn-primary w-full"
                 >Clear Effects</button>
@@ -100,6 +110,10 @@ export default ({ onClose }: EffectListProps) => {
                     const handleEditClick = () => {
                         setSelectedEffect(effect);
                         setShowEditForm(true);
+                    }
+
+                    const handleDeleteClick = () => {
+                        handleDeleteItem(effect.id!);
                     }
 
                     return (
@@ -139,20 +153,26 @@ export default ({ onClose }: EffectListProps) => {
                             <span className="flex self-center">
                                 {effect.name}
                             </span>
-                            <button onClick={handleEditClick} type="button" className="btn btn-circle btn-ghost">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="w-5 h-5"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                            </button>
+                            <details className="dropdown">
+                                <summary className="btn m-1">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="w-5 h-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+                                    </svg>
+                                </summary>
+                                <ul className="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                                    <li><a onClick={handleEditClick}>Edit</a></li>
+                                    <li><a onClick={handleDeleteClick}>Delete</a></li>
+                                </ul>
+                            </details>
                         </div>
                     )
                 })}

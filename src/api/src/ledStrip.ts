@@ -52,7 +52,7 @@ class LEDStrip {
 
     highlightNodes(nodes: NodesArgumentData) {
         this.detachedExec({
-            'highlights': JSON.stringify(nodes),
+            'highlight': JSON.stringify(nodes),
         })
     }
 

@@ -380,7 +380,7 @@ export default ({ onClose, onSuccess, effect }: AreaEffectFormProps) => {
                     </div>
                 </div>
             </div>
-            <div className="absolute bottom-0 h-12 join w-full pr-12">
+            <div className="absolute bottom-0 h-16 join w-full pr-12">
                 <button
                     type="button"
                     className="btn btn-neutral join-item w-1/2"

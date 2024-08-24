@@ -29,6 +29,24 @@ class EffectManager {
         return data;
     }
 
+    async delete(effectId: EffectData['id']) {
+        const response = await fetch(
+            `${this.#apiBase}/effect/delete`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    effectId
+                }),
+                headers: new Headers({
+                    'content-type': 'application/json'
+                })
+            }
+        );
+        const data = await response.json();
+
+        return data;
+    }
+
     async changeActiveEffect(id: EffectData['id'], isActive: boolean) {
         const response = await fetch(
             `${this.#apiBase}/toggle`,

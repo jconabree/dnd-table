@@ -1,9 +1,9 @@
 // src/index.js
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import { getAllAreas, saveArea } from './models/areas';
+import { getAllAreas, saveArea, deleteArea } from './models/areas';
 import { getConfig, saveConfig } from './models/configurations';
-import { getAllEffects, saveEffect, changeActive } from './models/effects';
+import { getAllEffects, saveEffect, changeActive, deleteEffect } from './models/effects';
 import { publishCharacterStates } from "./models/initiative";
 import { highlightNodes, clearAll } from "./models/nodes";
 
@@ -19,11 +19,13 @@ app.use(express.json());
 enum API_ENDPOINTS {
 	AREA_LIST = 'areas',
 	AREA_SAVE = 'areas/area',
+	AREA_DELETE = 'areas/area/delete',
 	CLEAR = 'clear',
 	CONFIG_GET = 'config',
 	CONFIG_SAVE = 'config',
 	EFFECT_LIST = 'effects',
 	EFFECT_SAVE = 'effects/effect',
+	EFFECT_DELETE = 'effects/effect/delete',
 	EFFECT_TOGGLE = 'effects/toggle',
 	INITIATIVE_STATES = 'initiative/states',
 	HIGHLIGHT_NODES = 'nodes/highlight',
@@ -53,6 +55,13 @@ app.post(`${API_BASE}/${API_ENDPOINTS.AREA_SAVE}`, (req: Request, res: Response)
     res.json(savedArea);
 });
 
+app.post(`${API_BASE}/${API_ENDPOINTS.AREA_DELETE}`, (req: Request, res: Response) => {
+    const { areaId } = req.body;
+	deleteArea(areaId);
+
+    res.json({ success: true });
+});
+
 app.get(`${API_BASE}/${API_ENDPOINTS.EFFECT_LIST}`, (req: Request, res: Response) => {
     const effects = getAllEffects();
     res.json(effects);
@@ -63,6 +72,13 @@ app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_SAVE}`, (req: Request, res: Respons
 	const savedArea = saveEffect(effect);
 
     res.json(savedArea);
+});
+
+app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_DELETE}`, (req: Request, res: Response) => {
+    const { effectId } = req.body;
+	deleteEffect(effectId);
+
+    res.json({ success: true });
 });
 
 app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_TOGGLE}`, (req: Request, res: Response) => {
@@ -95,11 +111,12 @@ app.post(`${API_BASE}/${API_ENDPOINTS.INITIATIVE_STATES}`, (req: Request, res: R
 app.get(`${API_BASE}/${API_ENDPOINTS.CONFIG_GET}`, (req: Request, res: Response) => {
 	const config = getConfig();
 
-    res.json({ config });
+    res.json({ ...config || {} });
 });
 
 app.post(`${API_BASE}/${API_ENDPOINTS.CONFIG_SAVE}`, (req: Request, res: Response) => {
 	const config = req.body;
+	console.log('config', config)
 	const success = saveConfig(config);
 
     res.json({ success });

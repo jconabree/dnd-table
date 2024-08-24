@@ -11,6 +11,9 @@ def clear_strip(strip):
 def parse_argument(raw):
     return json.loads(raw)
 
+def parse_color_string(colorString):
+    return re.sub('[^0-9,]', '', colorString).split(',')
+
 def show_effect(strip, effect):
     print("show effect based on config")
     print(effect)
@@ -19,7 +22,7 @@ def show_effect(strip, effect):
         if (effectData["type"] != "solid"):
             print("Only supporting solid colors for now")
 
-        solidColorValues = re.sub('[^0-9,]', '', effectData["value"]).split(',')
+        solidColorValues = parse_color_string(effectData["value"])
         strip_manager.colorWipe(strip, effect["nodes"], strip_manager.colorFromRgba(*solidColorValues))
 
         if ("duration" in effectData and effectData["duration"] < 1):
@@ -58,16 +61,12 @@ def show_characters(strip, characters):
             healthPercent = (int(character['currentHealth']) / int(character['maxHealth'])) * 100
             r, g, b = percentage_to_rgb(healthPercent)
             color = strip_manager.colorFromRgba(r, g, b, 1)
-            print("max health is defined: " + str(r) + "," + str(g) + "," + str(b))
 
         if (character["isCurrent"]):
             print("is current")
             firstNode = [character['nodes'][0]]
             lastNode = [character['nodes'][-1]]
             healthNodes = character['nodes'][1:-1]
-            print("First Node: " + "".join(str(x) for x in firstNode))
-            print("Last Node: " + "".join(str(x) for x in lastNode))
-            print("Health Nodes: " + "".join(str(x) for x in healthNodes))
 
             highlightColor = whiteColor if character['maxHealth'] is not None else whiteHighlightColor
             strip_manager.colorWipe(strip, firstNode, highlightColor)
@@ -83,12 +82,18 @@ def show_characters(strip, characters):
     offColor = strip_manager.colorFromRgba(20, 20, 20, 1)
     # strip_manager.inverseColorWipe(strip, uniquePlayerPixels, offColor)
 
+def highlight_nodes(strip, nodes, color):
+    print("highlighting nodes")
+    solidColorValues = parse_color_string(color)
+    strip_manager.colorWipe(strip, nodes, strip_manager.colorFromRgba(*solidColorValues))
+
 
 def run():
     parser = argparse.ArgumentParser("LED_Strip")
     parser.add_argument("--clear", help="Clear all active effect", action='store_true')
     parser.add_argument("--effect", help="JSON encoded effect data")
     parser.add_argument("--characters", help="JSON encoded player inititiative data")
+    parser.add_argument("--highlight", help="JSON encoded player inititiative data")
     args = parser.parse_args()
 
     strip = strip_manager.initStrip()
@@ -103,6 +108,10 @@ def run():
     if (args.characters):
         characters = parse_argument(args.characters)
         show_characters(strip, characters)
+
+    if (args.highlight):
+        highlight = parse_argument(args.highlight)
+        highlight_nodes(strip, highlight['nodes'], highlight['color'])
 
     print("hello world")
 

@@ -34,7 +34,7 @@ def colorWipe(strip, nodes, colorWithBrightness, wait_ms=0):
         # Always minus one. Base index for app is 1, for strip is 0
         strip.setPixelColor(i - 1, color)
         strip.show()
-        if (wait_ms > 0):
+        if (wait_ms >= 1):
             time.sleep(wait_ms/1000.0)
 
 def inverseColorWipe(strip, excludeNodes, colorWithBrightness, wait_ms=0):
@@ -57,8 +57,7 @@ def clearStrip(strip):
     colorWipe(strip, range(strip.numPixels()), [Color(0,0,0), 255])
 
 def colorFromRgba(r, g, b, a):
-    # For some reason, green and blue are flipped
-    return [Color(int(r), int(b), int(g)), round(int(a) * 255, 0)]
+    return [Color(int(r), int(g)), int(b), round(int(a) * 255, 0)]
 
 # def theaterChase(strip, color, wait_ms=50, iterations=10):
 #     """Movie theater light style chaser animation."""

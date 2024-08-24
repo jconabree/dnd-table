@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useConfiguratorContext } from "~/context/ConfiguratorProvider";
 import areaManager from '~/models/areas';
+import nodeManager from '~/models/nodes';
 import { AreaData } from "~/types/interface";
 
 type AddNewSelectionProps = {
@@ -24,6 +25,7 @@ export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
         const defaultOption: HTMLOptionElement = typeRef.current!.querySelector('option[value=""]')!;
         defaultOption.selected = true;
         setSelection([]);
+        nodeManager.clearAll();
     }, [setSelection]);
 
     const handleNameChange = useCallback(() => {
@@ -61,7 +63,7 @@ export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
             type: type as AreaData['type'],
             nodes: selection
         };
-        console.log('save selection', areaToSave);
+
         const updatedArea = await areaManager.save(areaToSave);
         if (typeof onSuccess === 'function') {
             onSuccess(updatedArea);
@@ -72,47 +74,62 @@ export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
 
     useEffect(() => {
         setIsSelectMode(true);
+        if (area) {
+            setSelection(area.nodes ?? []);
+        }
 
         return () => {
             setIsSelectMode(false);
         }
     }, []);
+
+    useEffect(() => {
+        if (selection) {
+            nodeManager.highlight({
+                nodes: selection
+            });
+        } else {
+            nodeManager.clearAll();
+        }
+    }, [selection]);
     
     return (
-        <div className="h-full flex flex-col justify-between">
-            <div className="flex flex-col gap-y-6">
-                <label className="form-control w-full max-w-xs">
-                    <div className="label">
-                        <span className="label-text">Area Name</span>
-                    </div>
-                    <input
-                        ref={nameRef}
-                        onChange={handleNameChange}
-                        type="text"
-                        placeholder="Name"
-                        className={`input input-bordered w-full max-w-xs ${nameError ? 'input-error' : ''}`}
-                        defaultValue={area?.name}
-                    />
-                </label>
-                
-                <label className="form-control w-full max-w-xs">
-                    <div className="label">
-                        <span className="label-text">Area Type</span>
-                    </div>
-                    <select
-                        ref={typeRef}
-                        onChange={handleTypeChange}
-                        className={`select select-bordered w-full max-w-xs ${typeError ? 'select-error' : ''}`}
-                        defaultValue={area?.type}
-                    >
-                        <option disabled value="">Select Type...</option>
-                        <option value="dndplayer">DND Player</option>
-                        <option value="player">Player</option>
-                        <option value="basic">Basic</option>
-                    </select>
-                </label>
+        <>
+            <div className="flex flex-col justify-between">
+                <div className="flex flex-col gap-y-6">
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">Area Name</span>
+                        </div>
+                        <input
+                            ref={nameRef}
+                            onChange={handleNameChange}
+                            type="text"
+                            placeholder="Name"
+                            className={`input input-bordered w-full max-w-xs ${nameError ? 'input-error' : ''}`}
+                            defaultValue={area?.name}
+                        />
+                    </label>
+                    
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">Area Type</span>
+                        </div>
+                        <select
+                            ref={typeRef}
+                            onChange={handleTypeChange}
+                            className={`select select-bordered w-full max-w-xs ${typeError ? 'select-error' : ''}`}
+                            defaultValue={area?.type}
+                        >
+                            <option disabled value="">Select Type...</option>
+                            <option value="dndplayer">DND Player</option>
+                            <option value="player">Player</option>
+                            <option value="basic">Basic</option>
+                        </select>
+                    </label>
+                </div>
             </div>
-            <div className="join w-full">
+            <div className="absolute bottom-0 h-16 join w-full pr-12">
                 <button
                     type="button"
                     className="btn btn-neutral join-item w-1/2"
@@ -129,6 +146,6 @@ export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
                     Confirm
                 </button>
             </div>
-        </div>
+        </>
     )
 }

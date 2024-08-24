@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import areaModel from "../models/areas";
+import nodesModel from '~/models/nodes';
 import { AreaData } from '../types/interface';
 import ToggleView from './ToggleView';
 import EditArea from './EditArea';
@@ -52,15 +53,24 @@ export default ({ onClose }: ListAreasProps) => {
         setAreas((currentItems) =>{
             return items?.map((item) => {
                 const currentItem = currentItems?.find(({ id }) => id === item.id);
-                item.visible = currentItem?.visible ?? true;
+                item.visible = currentItem?.visible ?? false;
 
                 return item;
             });
         });
     }, [])
 
+    const handleDeleteItem = useCallback((itemId: string) => {
+        areaModel.delete(itemId);
+        loadList();
+    }, []);
+
     useEffect(() => {
         loadList();
+
+        return () => {
+            nodesModel.clearAll();
+        }
     }, []);
     
     useEffect(() => {
@@ -74,11 +84,15 @@ export default ({ onClose }: ListAreasProps) => {
             return;
         }
 
-        const visibleAreas = areas!.filter((area) => {
-            return area.visible;
-        });
+        nodesModel.clearAll();
 
-        console.log('set canvas visible areas', visibleAreas);
+        areas!.filter((area) => {
+            return area.visible;
+        }).forEach((area) => {
+            return nodesModel.highlight({
+                nodes: area.nodes
+            });
+        });
     }, [areas])
 
     if (showEditForm) {
@@ -132,26 +146,36 @@ export default ({ onClose }: ListAreasProps) => {
                         setShowEditForm(true);
                     }
 
+                    const handleDeleteClick = () => {
+                        handleDeleteItem(area.id!);
+                    }
+
                     return (
                         <div key={area.id} className="flex justify-between items-center py-2 border-t last:border-b border-gray-400">
-                            <ToggleView onChange={handleVisibilityChange} />
+                            <ToggleView onChange={handleVisibilityChange} isOnByDefault={area.visible} />
                             <span className="flex self-center">
                                 {area.name}
                             </span>
-                            <button onClick={handleEditClick} type="button" className="btn btn-circle btn-ghost">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="w-5 h-5"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                            </button>
+                            <details className="dropdown">
+                                <summary className="btn m-1">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="w-5 h-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+                                    </svg>
+                                </summary>
+                                <ul className="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                                    <li><a onClick={handleEditClick}>Edit</a></li>
+                                    <li><a onClick={handleDeleteClick}>Delete</a></li>
+                                </ul>
+                            </details>
                         </div>
                     )
                 })}

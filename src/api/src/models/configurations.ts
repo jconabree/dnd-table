@@ -15,6 +15,7 @@ export const saveConfig = (configurations: Partial<TableConfiguration>): boolean
     const config = loadData();
     try {
         config.updateData(configurations);
+        config.save();
     } catch {
         return false;
     }

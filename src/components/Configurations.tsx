@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useConfiguratorContext } from '~/context/ConfiguratorProvider';
 import { TableConfiguration } from "~/types/interface";
 import configModel from '~/models/config';
 import nodesModel from '~/models/nodes';
@@ -11,15 +12,8 @@ type InitiativeModeProps = {
 const lengthOrder: (keyof TableConfiguration['nodeCount'])[] = ['bottom', 'right', 'top', 'left'];
 
 export default ({ onClose }: InitiativeModeProps) => {
-    const [config, setConfig] = useState<TableConfiguration>();
+    const { config, saveConfig } = useConfiguratorContext();
     const [updatedNodeConfig, setUpdatedNodeConfig] = useState<Partial<TableConfiguration['nodeCount']>>();
-
-    useEffect(() => {
-        (async () => {
-            const configuration = await configModel.get();
-            setConfig(configuration);
-        })()
-    }, []);
 
     const handleLengthChange = useCallback((type: keyof TableConfiguration['nodeCount'], value: number) => {
         const startPosition = lengthOrder.reduce<number>((length, side: keyof TableConfiguration['nodeCount'], index) => {
@@ -31,7 +25,7 @@ export default ({ onClose }: InitiativeModeProps) => {
         }, 0);
 
         const nodes = Array.from({ length: value }).map((_, index) => {
-            return index + startPosition
+            return index + startPosition + 1 // led strip is used to receiving base of 0
         });
 
         setUpdatedNodeConfig((currentUpdates) => {
@@ -44,7 +38,7 @@ export default ({ onClose }: InitiativeModeProps) => {
         nodesModel.highlight({
             nodes,
             color: DEFAULT_COLOR
-        })
+        });
     }, [config, updatedNodeConfig]);
 
     const handleBlur = useCallback(() => {
@@ -53,10 +47,10 @@ export default ({ onClose }: InitiativeModeProps) => {
 
     const handleSave = useCallback(() => {
         (async () => {
-            const saveResponse = await configModel.save({
+            const saveResponse = await saveConfig({
                 ...config,
                 nodeCount: Object.fromEntries(
-                    lengthOrder.map((key) => [key, updatedNodeConfig?.[key] ?? 0])
+                    lengthOrder.map((key) => [key, (updatedNodeConfig?.[key] ?? (config?.nodeCount?.[key] ?? 0))])
                 ) as TableConfiguration['nodeCount']
             });
 
@@ -73,7 +67,7 @@ export default ({ onClose }: InitiativeModeProps) => {
     return (
         <div>
             <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2 gap-y-4 items-center">
-                {updatedNodeConfig && Object.keys(updatedNodeConfig).length && (
+                {updatedNodeConfig && Object.keys(updatedNodeConfig).length > 0 && (
                     <button
                         onClick={handleSave}
                         type="button"
@@ -106,6 +100,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                                     placeholder={label}
                                     onChange={handleChange}
                                     className="grow w-full disabled:text-accent py-3 px-4"
+                                    onBlur={handleBlur}
                                 />
                             </label>
                         )

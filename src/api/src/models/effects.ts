@@ -22,6 +22,11 @@ export const saveEffect = (data: EffectData) => {
     return savedItem;
 }
 
+export const deleteEffect = (effectId: EffectData['id']) => {
+    const model = loadData();
+    model.deleteItem(effectId);
+}
+
 export const changeActive = (effectId: EffectData['id']|undefined|null, active: boolean): boolean => {
     if (!active || !effectId) {
         // TODO eventually be smarter and clear only specified effect and fallback to other active effect

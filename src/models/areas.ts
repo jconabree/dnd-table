@@ -34,6 +34,25 @@ class AreaManager {
         return data;
     }
 
+    async delete(areaId: AreaData['id']) {
+        this.#cache = null;
+        const response = await fetch(
+            `${this.#apiBase}/area/delete`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    areaId
+                }),
+                headers: new Headers({
+                    'content-type': 'application/json'
+                })
+            }
+        );
+        const data = await response.json();
+
+        return data;
+    }
+
     async show(area: AreaData) {
         const { nodes, highlightColor: color } = area;
         const data = await nodesManager.highlight({
