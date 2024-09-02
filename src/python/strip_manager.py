@@ -59,7 +59,7 @@ def clearStrip(strip):
     colorWipe(strip, range(strip.numPixels()), [Color(0,0,0), 255])
 
 def colorFromRgba(r, g, b, a):
-    return [Color(int(b), int(g), int(r)), round(int(a) * 255, 0)]
+    return [Color(int(r), int(g), int(b)), round(int(a) * 255, 0)]
 
 # def theaterChase(strip, color, wait_ms=50, iterations=10):
 #     """Movie theater light style chaser animation."""
