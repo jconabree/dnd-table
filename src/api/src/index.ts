@@ -1,11 +1,9 @@
 // src/index.js
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import { getAllAreas, saveArea, deleteArea } from './models/areas';
+import { getAllAreas, saveArea, deleteArea, getAllSegments } from './models/areas';
 import { getConfig, saveConfig } from './models/configurations';
-import { getAllEffects, saveEffect, changeActive, deleteEffect } from './models/effects';
-import { publishCharacterStates } from "./models/initiative";
-import { highlightNodes, clearAll } from "./models/nodes";
+import { publishCharacterStates, stopInitiative } from "./models/initiative";
 
 dotenv.config();
 
@@ -20,15 +18,11 @@ enum API_ENDPOINTS {
 	AREA_LIST = 'areas',
 	AREA_SAVE = 'areas/area',
 	AREA_DELETE = 'areas/area/delete',
-	CLEAR = 'clear',
+	SEGMENTS_LIST = 'areas/segments',
 	CONFIG_GET = 'config',
 	CONFIG_SAVE = 'config',
-	EFFECT_LIST = 'effects',
-	EFFECT_SAVE = 'effects/effect',
-	EFFECT_DELETE = 'effects/effect/delete',
-	EFFECT_TOGGLE = 'effects/toggle',
 	INITIATIVE_STATES = 'initiative/states',
-	HIGHLIGHT_NODES = 'nodes/highlight',
+	INITIATIVE_STOP = 'initiative/stop',
 }
 
 app.get(`${API_BASE}`, (req: Request, res: Response) => {
@@ -62,48 +56,21 @@ app.post(`${API_BASE}/${API_ENDPOINTS.AREA_DELETE}`, (req: Request, res: Respons
     res.json({ success: true });
 });
 
-app.get(`${API_BASE}/${API_ENDPOINTS.EFFECT_LIST}`, (req: Request, res: Response) => {
-    const effects = getAllEffects();
-    res.json(effects);
-});
+app.get(`${API_BASE}/${API_ENDPOINTS.SEGMENTS_LIST}`, async (req: Request, res: Response) => {
+	const segments = await getAllSegments();
 
-app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_SAVE}`, (req: Request, res: Response) => {
-    const { effect } = req.body;
-	const savedArea = saveEffect(effect);
-
-    res.json(savedArea);
-});
-
-app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_DELETE}`, (req: Request, res: Response) => {
-    const { effectId } = req.body;
-	deleteEffect(effectId);
-
-    res.json({ success: true });
-});
-
-app.post(`${API_BASE}/${API_ENDPOINTS.EFFECT_TOGGLE}`, (req: Request, res: Response) => {
-    const { effectId, active } = req.body;
-	const result = changeActive(effectId, active);
-
-    res.json({ success: result });
-});
-
-app.post(`${API_BASE}/${API_ENDPOINTS.CLEAR}`, (req: Request, res: Response) => {
-	const result = clearAll();
-
-    res.json({ success: result });
-});
-
-app.post(`${API_BASE}/${API_ENDPOINTS.HIGHLIGHT_NODES}`, (req: Request, res: Response) => {
-	const { nodes, color } = req.body;
-	const result = highlightNodes(nodes, color);
-
-    res.json({ success: result });
+    res.json(segments);
 });
 
 app.post(`${API_BASE}/${API_ENDPOINTS.INITIATIVE_STATES}`, (req: Request, res: Response) => {
 	const { characters } = req.body;
 	publishCharacterStates(characters);
+
+    res.json({ success: true });
+});
+
+app.post(`${API_BASE}/${API_ENDPOINTS.INITIATIVE_STOP}`, (req: Request, res: Response) => {
+	stopInitiative();
 
     res.json({ success: true });
 });
@@ -116,7 +83,6 @@ app.get(`${API_BASE}/${API_ENDPOINTS.CONFIG_GET}`, (req: Request, res: Response)
 
 app.post(`${API_BASE}/${API_ENDPOINTS.CONFIG_SAVE}`, (req: Request, res: Response) => {
 	const config = req.body;
-	console.log('config', config)
 	const success = saveConfig(config);
 
     res.json({ success });

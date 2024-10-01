@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AreaData, Character, CharacterArgumentData } from "~/types/interface";
 import areasModel from '~/models/areas';
-import effectsModel from '~/models/effects';
 import initiativeModel from '~/models/initiative';
 
 type InitiativeModeProps = {
@@ -19,7 +18,7 @@ export default ({ onClose }: InitiativeModeProps) => {
     useEffect(() => {
         (async () => {
             const allAreas = await areasModel.list();
-            setAreas(allAreas.filter(({ type }) => type === 'dndplayer'));
+            setAreas(allAreas);
         })()
     }, []);
 
@@ -125,8 +124,7 @@ export default ({ onClose }: InitiativeModeProps) => {
     const handleStop = useCallback(() => {
         setCurrentTurn(null);
         setIsStarted(false);
-
-        effectsModel.clearAll();
+        initiativeModel.stopStates();
     }, []);
 
     const handlePrevious = useCallback(() => {
@@ -148,7 +146,7 @@ export default ({ onClose }: InitiativeModeProps) => {
 
         const charactersData = orderedCharacters.map<CharacterArgumentData>((character, index) => {
             return {
-                nodes: character.area.nodes,
+                area: character.area,
                 isCurrent: currentTurn === index,
                 currentHealth: character.showHealth ? character.health.current : null,
                 maxHealth: character.showHealth ? character.health.max:  null,
@@ -203,7 +201,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                     <ul className="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
                         {areas.map((area) => {
                             return (
-                                <li><a onClick={() => { handleCreateNew(area) }}>{area.name}</a></li>
+                                <li key={area.name}><a onClick={() => { handleCreateNew(area) }}>{area.name}</a></li>
                             )
                         })}
                     </ul>
@@ -227,7 +225,7 @@ export default ({ onClose }: InitiativeModeProps) => {
                     const showHealth = updatedCharacter?.showHealth ?? character.showHealth;
 
                     return (
-                        <div className={`p-4 rounded-lg bg-base-100 text-base-content w-full grid grid-cols-2 gap-x-3 gap-y-8 relative border ${currentTurn === index ? 'border-accent' : ' border-base-100'}`}>
+                        <div key={orderCharacter.id} className={`p-4 rounded-lg bg-base-100 text-base-content w-full grid grid-cols-2 gap-x-3 gap-y-8 relative border ${currentTurn === index ? 'border-accent' : ' border-base-100'}`}>
                             {!isStarted && (
                                 <button className="btn btn-error btn-circle btn-sm absolute -top-3 -right-1" onClick={() => { removeCharacter(orderCharacter) }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">

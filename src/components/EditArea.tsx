@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useConfiguratorContext } from "~/context/ConfiguratorProvider";
+import { useCallback, useEffect, useState } from "react";
 import areaManager from '~/models/areas';
-import nodeManager from '~/models/nodes';
-import { AreaData } from "~/types/interface";
+import { AreaData, Segment } from "~/types/interface";
 
 type AddNewSelectionProps = {
     onClose: () => void;
@@ -11,87 +9,49 @@ type AddNewSelectionProps = {
 }
 
 export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
-    const { selection, setSelection, setIsSelectMode } = useConfiguratorContext();
-    const [nameError, setNameError] = useState<boolean>();
-    const [typeError, setTypeError] = useState<boolean>();
-    const nameRef = useRef<HTMLInputElement>(null);
-    const typeRef = useRef<HTMLSelectElement>(null);
-
-    const resetForm = useCallback(() => {
-        setNameError(false);
-        setTypeError(false);
-        nameRef.current!.value = '';
-        typeRef.current!.value = '';
-        const defaultOption: HTMLOptionElement = typeRef.current!.querySelector('option[value=""]')!;
-        defaultOption.selected = true;
-        setSelection([]);
-        nodeManager.clearAll();
-    }, [setSelection]);
-
-    const handleNameChange = useCallback(() => {
-        setNameError(false);
-    }, []);
-
-    const handleTypeChange = useCallback(() => {
-        setTypeError(false);
-    }, []);
+    const [allSegments, setAllSegments] = useState<Segment[]>();
+    const [name, setName] = useState<string>();
+    const [segment, setSegment] = useState<number>();
+    const [segmentPre, setSegmentPre] = useState<number>();
+    const [segmentPost, setSegmentPost] = useState<number>();
     
     const handleCancelClick = useCallback(() => {
-        resetForm();
         onClose();
-    }, [onClose, resetForm]);
+    }, [onClose]);
 
     const handleConfirmClick = useCallback(async () => {
-        const name = nameRef.current!.value;
-        const type = typeRef.current!.value;
-
-        if (!name) {
-            setNameError(true);
-        }
-
-        if (!type) {
-            setTypeError(true);
-        }
-
-        if (!name || !type) {
+        if (!name || !segment) {
             return;
         }
 
         const areaToSave = {
             ...area||{},
             name,
-            type: type as AreaData['type'],
-            nodes: selection
+            segment,
+            segmentPre,
+            segmentPost
         };
 
         const updatedArea = await areaManager.save(areaToSave);
         if (typeof onSuccess === 'function') {
             onSuccess(updatedArea);
         }
-        resetForm();
+
         onClose();
-    }, [selection, resetForm, onClose]);
+    }, [name, segment, segmentPre, segmentPost, onClose]);
 
     useEffect(() => {
-        setIsSelectMode(true);
-        if (area) {
-            setSelection(area.nodes ?? []);
-        }
+        (async () => {
+            const [_, ...segments] = await areaManager.getAllSegments();
 
-        return () => {
-            setIsSelectMode(false);
-        }
+            setAllSegments(segments);
+        })()
     }, []);
 
-    useEffect(() => {
-        if (selection) {
-            nodeManager.highlight({
-                nodes: selection
-            });
-        } else {
-            nodeManager.clearAll();
-        }
-    }, [selection]);
+
+    if (!allSegments) {
+        return 'Loading segments';
+    }
     
     return (
         <>
@@ -102,30 +62,71 @@ export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
                             <span className="label-text">Area Name</span>
                         </div>
                         <input
-                            ref={nameRef}
-                            onChange={handleNameChange}
+                            onChange={(event) => setName(event.target.value)}
                             type="text"
                             placeholder="Name"
-                            className={`input input-bordered w-full max-w-xs ${nameError ? 'input-error' : ''}`}
+                            className={`input input-bordered w-full max-w-xs`}
                             defaultValue={area?.name}
                         />
                     </label>
-                    
+
                     <label className="form-control w-full max-w-xs">
                         <div className="label">
-                            <span className="label-text">Area Type</span>
+                            <span className="label-text">Segment</span>
                         </div>
                         <select
-                            ref={typeRef}
-                            onChange={handleTypeChange}
-                            className={`select select-bordered w-full max-w-xs ${typeError ? 'select-error' : ''}`}
-                            defaultValue={area?.type}
+                            className="select select-bordered"
+                            defaultValue={area?.segment || ''}
+                            onChange={(event) => setSegment(event.target.value ? Number(event.target.value) : undefined)}
                         >
-                            <option disabled value="">Select Type...</option>
-                            <option value="dndplayer">DND Player</option>
-                            <option value="player">Player</option>
-                            <option value="basic">Basic</option>
+                            <option value="">Select a segment</option>
+                            {allSegments.map((segment) => {
+                                return (
+                                    <option value={segment.id}>{segment.name}</option>
+                                )
+                            })}
                         </select>
+                    </label>
+
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">Pre Segment</span>
+                        </div>
+                        <select
+                            className="select select-bordered"
+                            defaultValue={area?.segmentPre || ''}
+                            onChange={(event) => setSegmentPre(event.target.value ? Number(event.target.value) : undefined)}
+                        >                            <option value="">Select a segment</option>
+                            {allSegments.map((segment) => {
+                                return (
+                                    <option value={segment.id}>{segment.name}</option>
+                                )
+                            })}
+                        </select>
+                        <div className="label">
+                            <span className="label-text-alt">Initiative Right</span>
+                        </div>
+                    </label>
+
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">Post Segment</span>
+                        </div>
+                        <select
+                            className="select select-bordered"
+                            defaultValue={area?.segmentPost || ''}
+                            onChange={(event) => setSegmentPost(event.target.value ? Number(event.target.value) : undefined)}
+                        >
+                            <option value="">Select a segment</option>
+                            {allSegments.map((segment) => {
+                                return (
+                                    <option value={segment.id}>{segment.name}</option>
+                                )
+                            })}
+                        </select>
+                        <div className="label">
+                            <span className="label-text-alt">Initiative Left</span>
+                        </div>
                     </label>
                 </div>
             </div>
@@ -140,7 +141,7 @@ export default ({ onClose, onSuccess, area }: AddNewSelectionProps) => {
                 <button
                     type="button"
                     className="btn join-item w-1/2 btn-success"
-                    disabled={!selection?.length}
+                    disabled={!segment || !name}
                     onClick={handleConfirmClick}
                 >
                     Confirm

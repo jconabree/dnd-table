@@ -5,15 +5,15 @@ import configModel from '~/models/config';
 export type ConfiguratorContextValues = {
     isSelectMode: boolean;
     setIsSelectMode: (value: boolean) => void;
-    selection: number[];
-    setSelection: (value: number[]) => void;
+    segments?: number[];
+    setSegments: (segmentIds: number[]) => void;
     config?: TableConfiguration;
     saveConfig: (config: TableConfiguration) => Promise<Response>;
 };
 
 export default (): ConfiguratorContextValues => {
     const [isSelectMode, setIsSelectMode] = useState<boolean>(false);
-    const [selection, setSelection] = useState<number[]>([]);
+    const [segments, setSegments] = useState<number[]>();
     const [config, setConfig] = useState<TableConfiguration>();
 
     const loadConfig = useCallback(async () => {
@@ -23,7 +23,6 @@ export default (): ConfiguratorContextValues => {
 
     const saveConfig = useCallback(async (updatedConfig: TableConfiguration) => {
         const saveResponse = await configModel.save(updatedConfig);
-        console.log('saving config', saveResponse);
         setConfig(updatedConfig);
 
         return saveResponse;
@@ -36,8 +35,8 @@ export default (): ConfiguratorContextValues => {
     return {
         isSelectMode,
         setIsSelectMode,
-        selection,
-        setSelection,
+        segments,
+        setSegments,
         config,
         saveConfig
     };

@@ -1,9 +1,9 @@
-import { AreaData, AreaList } from '~/types/interface';
-import nodesManager from './nodes';
+import { AreaData, AreaList, Segment, SegmentList } from '~/types/interface';
 
 class AreaManager {
     #apiBase = '/api/areas';
     #cache: Promise<AreaList['items']>|null = null;
+    #segmentCache: Promise<SegmentList['items']>|null = null;
 
     async list(): Promise<AreaList['items']> {
         if (!this.#cache) {
@@ -53,18 +53,14 @@ class AreaManager {
         return data;
     }
 
-    async show(area: AreaData) {
-        const { nodes, highlightColor: color } = area;
-        const data = await nodesManager.highlight({
-            nodes,
-            color
-        });
+    async getAllSegments() {
+        if (!this.#segmentCache) {
+            const response = await fetch(`${this.#apiBase}/segments`);
+            console.log('fetch response', response);
+            this.#segmentCache = await response.json();
+        }
 
-        return data;
-    }
-
-    async hide() {
-        await nodesManager.clearAll();
+        return this.#segmentCache!;
     }
 }
 

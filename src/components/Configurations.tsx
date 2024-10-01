@@ -1,9 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useConfiguratorContext } from '~/context/ConfiguratorProvider';
 import { TableConfiguration } from "~/types/interface";
-import configModel from '~/models/config';
-import nodesModel from '~/models/nodes';
-import { DEFAULT_COLOR } from '~/constants/colors';
 
 type InitiativeModeProps = {
     onClose: () => void;
@@ -14,36 +11,20 @@ const lengthOrder: (keyof TableConfiguration['nodeCount'])[] = ['bottom', 'right
 export default ({ onClose }: InitiativeModeProps) => {
     const { config, saveConfig } = useConfiguratorContext();
     const [updatedNodeConfig, setUpdatedNodeConfig] = useState<Partial<TableConfiguration['nodeCount']>>();
+    const [updatedWledAddress, setUpdatedWledAddress] = useState<Partial<TableConfiguration['wledAddress']>>();
 
     const handleLengthChange = useCallback((type: keyof TableConfiguration['nodeCount'], value: number) => {
-        const startPosition = lengthOrder.reduce<number>((length, side: keyof TableConfiguration['nodeCount'], index) => {
-            if (side === type || index > lengthOrder.indexOf(type)) {
-                return length;
-            }
-
-            return length + (updatedNodeConfig?.[side] ?? (config?.nodeCount?.[side] ?? 0))
-        }, 0);
-
-        const nodes = Array.from({ length: value }).map((_, index) => {
-            return index + startPosition + 1 // led strip is used to receiving base of 0
-        });
-
         setUpdatedNodeConfig((currentUpdates) => {
             return {
                 ...currentUpdates || {},
                 [type]: value
             }
         });
-
-        nodesModel.highlight({
-            nodes,
-            color: DEFAULT_COLOR
-        });
     }, [config, updatedNodeConfig]);
-
-    const handleBlur = useCallback(() => {
-        nodesModel.clearAll();
-    }, []);
+    
+    const handleWledUpdate = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+        setUpdatedWledAddress(event.target.value);
+    }, [])
 
     const handleSave = useCallback(() => {
         (async () => {
@@ -51,14 +32,18 @@ export default ({ onClose }: InitiativeModeProps) => {
                 ...config,
                 nodeCount: Object.fromEntries(
                     lengthOrder.map((key) => [key, (updatedNodeConfig?.[key] ?? (config?.nodeCount?.[key] ?? 0))])
-                ) as TableConfiguration['nodeCount']
+                ) as TableConfiguration['nodeCount'],
+                wledAddress: updatedWledAddress || ''
             });
 
             console.log(saveResponse);
             setUpdatedNodeConfig({});
+            setUpdatedWledAddress(undefined);
         })();
 
-    }, [config, updatedNodeConfig]);
+    }, [config, updatedNodeConfig, updatedWledAddress]);
+
+    const hasChanged = (updatedWledAddress) || (updatedNodeConfig && Object.keys(updatedNodeConfig).length > 0)
 
     if (typeof config === 'undefined') {
         return null;
@@ -67,7 +52,7 @@ export default ({ onClose }: InitiativeModeProps) => {
     return (
         <div>
             <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2 gap-y-4 items-center">
-                {updatedNodeConfig && Object.keys(updatedNodeConfig).length > 0 && (
+                {hasChanged && (
                     <button
                         onClick={handleSave}
                         type="button"
@@ -100,11 +85,28 @@ export default ({ onClose }: InitiativeModeProps) => {
                                     placeholder={label}
                                     onChange={handleChange}
                                     className="grow w-full disabled:text-accent py-3 px-4"
-                                    onBlur={handleBlur}
                                 />
                             </label>
                         )
                     })}
+                </div>
+            </div>
+            <div className="collapse collapse-arrow bg-base-200">
+                <input type="radio" name="config-node-count" defaultChecked />
+                <div className="collapse-title text-xl font-medium">WLED Config</div>
+                <div className="collapse-content">
+                    <label className="form-control w-full max-w-xs">
+                        <div className="label">
+                            <span className="label-text">WLED Address</span>
+                        </div>
+                        <input
+                            type="text"
+                            defaultValue={config.wledAddress}
+                            placeholder="eg 192.168.68.54"
+                            onChange={handleWledUpdate}
+                            className="grow w-full disabled:text-accent py-3 px-4"
+                        />
+                    </label>
                 </div>
             </div>
         </div>

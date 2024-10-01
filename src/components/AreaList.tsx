@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import areaModel from "../models/areas";
-import nodesModel from '~/models/nodes';
 import { AreaData } from '../types/interface';
 import ToggleView from './ToggleView';
 import EditArea from './EditArea';
@@ -14,9 +13,7 @@ type ListAreasProps = {
 }
 
 export default ({ onClose }: ListAreasProps) => {
-    const initialRender = useRef(true);
     const [areas, setAreas] = useState<AreaListingItem[]>();
-    const [filteredType, setFilteredType] = useState<string>();
     const [selectedArea, setSelectedArea] = useState<AreaData>();
     const [showEditForm, setShowEditForm] = useState<boolean>(false);
 
@@ -29,35 +26,9 @@ export default ({ onClose }: ListAreasProps) => {
         setShowEditForm(false);
     }, []);
 
-    const filters = useMemo(() => {
-        return areas?.reduce((allFilters: string[], area) => {
-            if (!allFilters.includes(area.type)) {
-                allFilters.push(area.type);
-            }
-
-            return allFilters;
-        }, ['All']);
-    }, [areas]);
-
-    const filteredAreas = useMemo(() => {
-        if (!filteredType || filteredType === 'All') {
-            return areas;
-        }
-
-        return areas?.filter(({ type }) => type === filteredType);
-    }, [areas, filteredType]);
-
     const loadList = useCallback(async () => {
         const items: AreaListingItem[] = await areaModel.list();
-        console.log('response', items);
-        setAreas((currentItems) =>{
-            return items?.map((item) => {
-                const currentItem = currentItems?.find(({ id }) => id === item.id);
-                item.visible = currentItem?.visible ?? false;
-
-                return item;
-            });
-        });
+        setAreas(items);
     }, [])
 
     const handleDeleteItem = useCallback((itemId: string) => {
@@ -67,33 +38,7 @@ export default ({ onClose }: ListAreasProps) => {
 
     useEffect(() => {
         loadList();
-
-        return () => {
-            nodesModel.clearAll();
-        }
     }, []);
-    
-    useEffect(() => {
-        if (!areas) {
-            return;
-        }
-
-        if (initialRender.current) {
-            initialRender.current = false;
-
-            return;
-        }
-
-        nodesModel.clearAll();
-
-        areas!.filter((area) => {
-            return area.visible;
-        }).forEach((area) => {
-            return nodesModel.highlight({
-                nodes: area.nodes
-            });
-        });
-    }, [areas])
 
     if (showEditForm) {
         return <EditArea onClose={handleEditClose} onSuccess={loadList} area={selectedArea} />;
@@ -102,21 +47,6 @@ export default ({ onClose }: ListAreasProps) => {
     return (
         <div>
             <div className="actions -mt-8 mb-10 grid grid-cols-2 gap-x-2">
-                <div className="dropdown dropdown-left w-full">
-                    <button type="button" className="btn btn-neutral w-full">Filter By Type</button>
-                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                        {filters?.map((filter) => {
-                            return (
-                                <li
-                                    key={filter}
-                                    className={filter === filteredType ? 'bg-gray-200' : ''}
-                                >
-                                    <a onClick={() => setFilteredType(filter)}>{filter}</a>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                </div>
                 <button
                     onClick={handleNewClick}
                     type="button"
@@ -124,23 +54,7 @@ export default ({ onClose }: ListAreasProps) => {
                 >New Area</button>
             </div>
             <div className="menu">
-                {filteredAreas?.map((area) => {
-                    const handleVisibilityChange = (isVisible: boolean) => {
-                        setAreas((currentAreas) => {
-                            return [
-                                ...currentAreas!.map((currentArea) => {
-                                    if (currentArea.id === area.id) {
-                                        currentArea.visible = isVisible
-                                    }
-
-                                    return {
-                                        ...currentArea
-                                    };
-                                })
-                            ]
-                        })
-                    }
-
+                {areas?.map((area) => {
                     const handleEditClick = () => {
                         setSelectedArea(area);
                         setShowEditForm(true);
@@ -152,7 +66,6 @@ export default ({ onClose }: ListAreasProps) => {
 
                     return (
                         <div key={area.id} className="flex justify-between items-center py-2 border-t last:border-b border-gray-400">
-                            <ToggleView onChange={handleVisibilityChange} isOnByDefault={area.visible} />
                             <span className="flex self-center">
                                 {area.name}
                             </span>

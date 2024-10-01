@@ -20,6 +20,21 @@ class InitiativeModel {
 
         return data;
     }
+
+    async stopStates() {
+        const response = await fetch(
+            `${this.#apiBase}/stop`,
+            {
+                method: 'POST',
+                headers: new Headers({
+                    'content-type': 'application/json'
+                })
+            }
+        );
+        const data = await response.json();
+
+        return data;
+    }
 }
 
 export default new InitiativeModel();

@@ -7,7 +7,7 @@ export function Table() {
     const tableCanvas = useRef<TableCanvas>();
     const selectionSetByCanvas = useRef<boolean>(true);
     const [isReady, setIsReady] = useState<boolean>(false);
-    const { isSelectMode, setSelection, selection, config } = useConfiguratorContext();
+    const { isSelectMode, segments, config } = useConfiguratorContext();
 
     useEffect(() => {
         setIsReady(true);
@@ -29,14 +29,12 @@ export function Table() {
 
         if (!isSelectMode) {
             tableCanvas.current.setOnSelect(null);
-            setSelection([]);
 
             return;
         }
 
         tableCanvas.current.setOnSelect((ids) => {
             selectionSetByCanvas.current = true;
-            setSelection(ids);
             console.log('selected', ids);
         })
     }, [isSelectMode]);
@@ -47,10 +45,11 @@ export function Table() {
         }
 
         if (!selectionSetByCanvas.current) {
-            tableCanvas.current.setSelection(selection!);
+            // tableCanvas.current.setSelection(selection!);
+            // TODO fetch segment details and highlight on table
         }
         selectionSetByCanvas.current = false;
-    }, [selection, isReady]);
+    }, [segments, isReady]);
 
     useEffect(() => {
         if (!tableCanvas.current || !config) {
